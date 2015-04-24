@@ -15,7 +15,7 @@ int main()
   /* test[5] = 10;
   test[3] = 8;
   for (int i = 0; i < 12; i++)
-  {
+  { 
     printf("%d\n", test[i]);
   }
   printf("%d\n", sizeof(int)); */
