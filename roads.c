@@ -1,5 +1,6 @@
 #include "roads.h"
 #include <stdio.h>
+#include <math.h>
 
 bool connected(road_construction rc)
 {
@@ -97,29 +98,77 @@ void test_degrees()
     printf("%d ", degrees[i]);
  // free(degrees);
 }
+
 float *traffic_dist(town t, road_construction c, int n)
 {
-    float *dist = malloc(n*n*sizeof(float));
-    t.n=n;
-   // int *importance = t.importances;
-    int *degrees = degree(c);
+  float *dist = malloc(n * n * sizeof(float));
     
-    for(int i = 0; i<n; i++)
+  for(int i = 0; i<n; i++)
+  {
+    for(int j=0; j<n; j++)
     {
-        for(int j=0; j<n; j++)
-        {
-            if(c.roads[n*i+j])
-            {
-                //printf("%d and %d also %d plus %d", t.importances[i],degrees[i], t.importances[j], degrees[j]);
-                dist[n*i+j]= t.distances[n*i+j]*(1+((float)t.importances[j]/(float)degrees[j]) + ((float)t.importances[i]/degrees[i]));
-                //printf("%f", dist[n*i+j]);
-            }
-            else
-                dist[n*i+j]=INFTY;
-        }
+      if(c.roads[n*i+j])
+      {
+        float a1 = ((float)t.importances[j]/(float)c.degree[j]);
+        float a2 = ((float)t.importances[i]/(float)c.degree[i]);
+        //printf("%d and %d also %d plus %d", t.importances[i],degrees[i], t.importances[j], degrees[j]);
+        dist[n * i + j]= t.distances[n * i + j] * (1 + a1 + a2);
+        //printf("%f", dist[n*i+j]);
+      }
+      else
+      dist[n * i + j] = INFTY;
     }
+  }
    
    return dist;
+}
+
+float min(float n1, float n2)
+{
+  if (n1 < n2)
+  {
+    return n1;
+  }
+  else
+  {
+    return n2;
+  }
+}
+
+float *times(float *td, int n)
+{
+  float *time_matrix = malloc(n*n*sizeof(float));
+  for (int r = 0; r < n*n; r++)
+  {
+    time_matrix[r] = td[r];
+  }
+  for (int k = 0; k < n; k++)
+  {
+    for (int i = 0; i < n; i++)
+    {
+      for (int j = 0; j < n; j++)
+      {
+        if (i != j)
+        {
+          time_matrix[n*i+j] = time_matrix[n*j+i] = min(time_matrix[n*i+j],
+            time_matrix[n*i+k]+td[n*k+j]);
+        }
+      }
+    }
+  }
+  return time_matrix;
+}
+
+void test_time()
+{
+  float time[25] = {INFTY, 1, 1, INFTY, INFTY, 1, INFTY, 2.75, INFTY, 1, 1, 
+    2.75, INFTY, 5.75, 4.25, INFTY, INFTY, 5.75, INFTY, INFTY, INFTY, 1, 4.25,
+    INFTY, INFTY};
+  float *test = times(time,5);
+  for(int i=0;i<25;i++)
+  {
+    printf("%f ", test[i]);
+  }
 }
 
 void test_distance()
@@ -148,4 +197,17 @@ void test_distance()
     free(test);
 }
 
+float times_to_optimality(town t, float *times)
+{
+  float sum = 0;
+  
+  for (int i = 1, n = t.n; i < n; i++)
+  {
+    for (int j = 0; j < i; j++)
+    {
+      sum += times[n * i + j] * (log ((float)(t.importances[i] + t.importances[j])));
+    }
+  }
 
+  return sum;
+}

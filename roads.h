@@ -12,6 +12,8 @@ typedef struct {
 
 typedef struct {
   int n;
+  int m;
+  int *degree;
   bool *roads;
   float optimality;
 } road_construction;

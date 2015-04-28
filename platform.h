@@ -8,8 +8,8 @@ typedef struct {
   road_construction *optimal_constructions;
 } platform;
 
-platform *new_platform(int n);
+platform new_platform(int n);
 void extend_platform(platform *old_p, platform *new_p);
-void extend_rc(road_construction *rc, platform *new_p);
-void add_rc(road_construction *rc, platform *new_p); 
+void extend_rc(road_construction rc, platform *new_p);
+void add_rc(road_construction rc, platform *new_p); 
 
