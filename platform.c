@@ -54,63 +54,78 @@ void extend_platform(platform *old_p, platform *new_p)
 
 void extend_rc(road_construction rc, platform *new_p)
 {
-  for (int edges = 0; edges < MAX_K; edges++)
+  for (int edges = 1; edges <= MAX_K; edges++)
   {
     bool *roads = malloc(rc.n * sizeof(bool));
-    for (int i = rc.n - MAX_K; i < rc.n; i++)
+    for (int i = rc.n - edges; i < rc.n; i++)
     {
-      do
-      {
-        next(roads, rc.n);
-     
-        road_construction new_rc;
-        new_rc.n = rc.n + 1;
-        new_rc.m = rc.m + edges;
-        new_rc.degree = malloc((rc.n + 1) * sizeof(int));
-        for (int i = 0; i < rc.n; i++)
-          new_rc.degree[i] = rc.degree[i];
-        new_rc.degree[rc.n] = edges;
-        new_rc.roads = malloc((rc.n + 1) * (rc.n + 1) * sizeof(int));
-        for (int i = 0; i < rc.n; i++)
-          for (int j = 0; j < i; j++)
-            new_rc.roads[rc.n * i + j] = new_rc.roads[rc.n * j + i] 
-              = rc.roads[rc.n * i + j];
-        for (int i = 0; i < rc.n; i++)
-          if (roads[i])
-          {
-            new_rc.roads[(rc.n + 1) * rc.n + i] = 
-              new_rc.roads[(rc.n + 1)*i + rc.n] = 1;
-            new_rc.degree[i]++;
-          }
+      roads[i] = 1;
+    }
+   
+    while(true)
+    {
+      road_construction new_rc;
+      new_rc.n = rc.n + 1;
+      new_rc.m = rc.m + edges;
+      new_rc.degree = malloc((rc.n + 1) * sizeof(int));
+      for (int i = 0; i < rc.n; i++)
+        new_rc.degree[i] = rc.degree[i];
+      new_rc.degree[rc.n] = edges;
+      new_rc.roads = malloc((rc.n + 1) * (rc.n + 1) * sizeof(int));
+      for (int i = 0; i < rc.n; i++)
+        for (int j = 0; j < i; j++)
+          new_rc.roads[rc.n * i + j] = new_rc.roads[rc.n * j + i] 
+            = rc.roads[rc.n * i + j];
+      for (int i = 0; i < rc.n; i++)
+        if (roads[i])
+        {
+          new_rc.roads[(rc.n + 1) * rc.n + i] = 
+            new_rc.roads[(rc.n + 1)*i + rc.n] = 1;
+          new_rc.degree[i]++;
+        }
           
         // if maximum degree exceeded for some building, skip this combination 
         // of road construction
-        bool max_k_exceeded = false;
-        for (int i = 0; i < rc.n; i++)
-          if (new_rc.degree[i] > MAX_K)
-          {
-            free(new_rc.degree);
-            free(new_rc.roads);
-            max_k_exceeded = true;
-            break;
-          }
-        if (max_k_exceeded)
+      bool max_k_exceeded = false;
+      for (int i = 0; i < rc.n; i++)
+        if (new_rc.degree[i] > MAX_K)
+        {
+          free(new_rc.degree);
+          free(new_rc.roads);
+          max_k_exceeded = true;
+          break;
+        }
+      if (max_k_exceeded)
+      {
+        if(full(roads, rc.n, edges))
+         break;
+        else
+        {
+          next(roads, rc.n);
           continue;
+        }
+      }
         
         
         // TODO: calculate optimality here
+      else 
+      {
         
-        add_rc(new_rc, new_p);
+        add_rc(new_rc, new_p);        
+        if(full(roads, rc.n, edges))
+          break;
+        else
+          next(roads, rc.n);
       }
-      while (!full(roads, rc.n, edges));
     }
+    
     free(roads);
   }
 }
 
 void add_rc(road_construction rc, platform *new_p)
 {
-  int index = rc.m - new_p->n;
+  int index = rc.m - new_p->min_m;
   if (new_p->optimal_constructions[index].optimality > rc.optimality)
   {
     free(new_p->optimal_constructions[index].degree);
