@@ -64,6 +64,8 @@ void extend_rc(town t, road_construction rc, platform *new_p)
 {
   for (int edges = 1; edges <= MAX_K; edges++)
   {
+    if (rc.n < MAX_K)
+      break;
     bool *roads = malloc(rc.n * sizeof(bool));
     for (int i = rc.n - edges; i < rc.n; i++)
       roads[i] = 1;
@@ -103,8 +105,8 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         }
       if (max_k_exceeded)
       {
-          next(roads, rc.n);
-          continue;
+        next(roads, rc.n);
+        continue;
       }
       else 
       {
