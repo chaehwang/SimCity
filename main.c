@@ -131,10 +131,10 @@ int main()
     extend_platform(sub_town, cur_p, new_p);
      */
   
-  for (int i = 3; i <= 4; i++)
+  for (int i = 3; i <= 3; i++)
   {
     platform *new_p = new_platform(i);
-    town sub_town;
+    town sub_town; 
     sub_town.n = i;
     sub_town.distances = malloc(i * i * sizeof(float));
     sub_town.importances = malloc(i * sizeof(int));
@@ -149,6 +149,10 @@ int main()
     free(cur_p);
     cur_p = new_p;    
   }  
+ 
+ 
+  printf("2 edges: %f\n", cur_p->optimal_constructions[0].optimality);
+  printf("3 edges: %f\n", cur_p->optimal_constructions[1].optimality);
   
   /* bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
