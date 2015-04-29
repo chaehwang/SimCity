@@ -42,10 +42,10 @@ float *bruteforce (town t)
 {
     int *tri = malloc((t.n*t.n-t.n)/2*sizeof(int));
     int *all = malloc((t.n*t.n)*sizeof(bool));
-    float sum = malloc(sizeof(float));
-    int num = malloc(sizeof(num));
-    float opt = malloc(sizeof(float)*2);
-    for (int edges = 1; edges < K_MAX; edges++)
+    float sum;
+    int num;
+    float *opt = malloc(sizeof(float)*2);
+    for (int edges = 1; edges < MAX_K; edges++)
     {
         for (int i=t.n-edges; i<t.n; i++)
         {
@@ -58,7 +58,7 @@ float *bruteforce (town t)
             {
                 for(int j=0; j<=i;j++)
                 {
-                    if (i=j)
+                    if i=j
                     {
                         all[n*i+j] = 0;
                     }
@@ -72,7 +72,7 @@ float *bruteforce (town t)
             rc.n = t.n;
             rc.m = edges;
             rc.roads = all;
-            rc.degrees = degree(all,t.n);
+            rc.degree = degree(all,t.n);
             rc.optimality = times_to_optimality(t, times(traffic_dist(t,rc,t.n),t.n));
             
             if(connected rc)
@@ -88,8 +88,6 @@ float *bruteforce (town t)
         while (!full(tri, t.n, edges))
     }
     free(tri);
-    free(sum);
-    free(num);
     free(all);
     return opt
 }
