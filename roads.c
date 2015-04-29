@@ -51,13 +51,13 @@ bool connected(road_construction rc)
   return true;
 }
 
-int *degree(road_construction rc)
+int *degree(bool *roads, int n)
 {
-  int *node_degree = malloc(rc.n * sizeof(int));
-  for (int i = 0; i < rc.n; i++)
+  int *node_degree = malloc(n * sizeof(int));
+  for (int i = 0; i < n; i++)
   {
-    for (int j = i + 1; j < rc.n; j++)
-      if (rc.roads[rc.n * i + j])
+    for (int j = i + 1; j < n; j++)
+      if (roads[n * i + j])
       {
         node_degree[i]++;
         node_degree[j]++;
@@ -93,7 +93,7 @@ void test_degrees()
   road_construction rc;
   rc.roads = roads;
   rc.n = 5;
-  int *degrees = degree(rc);
+  int *degrees = degree(rc.roads, rc.n);
   for (int i = 0; i < 5; i++)
     printf("%d ", degrees[i]);
  // free(degrees);

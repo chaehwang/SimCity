@@ -8,11 +8,11 @@ typedef struct {
 } hi; 
 
 int y(int t)
-{
+{ 
   return 3; 
 }
 
-int main() 
+int main()  
 { 
   platform *test = malloc(sizeof(platform));
   *test = new_platform(5);
