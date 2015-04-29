@@ -117,7 +117,7 @@ int main()
   cur_p->optimal_constructions[0].roads[3] = 1;
   //printf("%d, %d", test.min_m, test.max_m);
        
-    platform *new_p = new_platform(3);
+    /*platform *new_p = new_platform(3);
     town sub_town;
     sub_town.n = 3;
     sub_town.distances = malloc(3 * 3 * sizeof(float));
@@ -129,12 +129,11 @@ int main()
         sub_town.distances[3 * j + k] = sub_town.distances[3 * k + j] = test_town.distances[4 * j + k];
     }
     extend_platform(sub_town, cur_p, new_p);
-    
-    printf("HI"); 
+     */
   
-  /*for (int i = 3; i <= 4; i++)
+  for (int i = 3; i <= 4; i++)
   {
-    platform *new_p = malloc(sizeof(platform));
+    platform *new_p = new_platform(i);
     town sub_town;
     sub_town.n = i;
     sub_town.distances = malloc(i * i * sizeof(float));
@@ -146,10 +145,10 @@ int main()
         sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = test_town.distances[4 * j + k];
     } 
     extend_platform(sub_town, cur_p, new_p);
-    //free(cur_p->optimal_constructions);
-    //free(cur_p);
-    //cur_p = new_p;    
-  }  */
+    free(cur_p->optimal_constructions);
+    free(cur_p);
+    cur_p = new_p;    
+  }  
   
   /* bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
