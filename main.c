@@ -24,7 +24,7 @@ float *bruteforce (town t, int edges)
     {
         tri[i]=1;
     }
-    do
+    while(true)
     {
         int counter = 0;
         for (int i=0; i<t.n;i++)
@@ -58,14 +58,14 @@ float *bruteforce (town t, int edges)
             num++;
             if (rc.optimality < opt[0])
                 opt[0] = rc.optimality;
-        }  
-        printf("HERE\n");
-        for (int i = 0; i < (t.n*t.n - t.n)/2; i++)
-          printf("%d", tri[i]);
-        printf(" ");
+        }
+        /*for (int i = 0; i < (t.n*t.n-t.n)/2; i++)
+            printf("%d", tri[i]);
+        printf(" ");*/  
+        if (full(tri, (t.n*t.n-t.n)/2, edges))
+            break;
         next(tri, (t.n*t.n-t.n)/2);
     }
-    while (!full(tri, (t.n*t.n-t.n)/2, edges));
     opt[1] = sum/num;
     //free(tri);
     //free(all);
@@ -75,12 +75,12 @@ float *bruteforce (town t, int edges)
 void test_bruteforce()
 {
     town t;
-    t.n = 4;
-    float dist[16] = {0,1,2,3,1,0,4,5,2,4,0,6,3,5,6,0};
+    t.n = 3;
+    float dist[9] = {0,3,4,3,0,5,4,5,0};
     t.distances = dist;
-    int importances[4] = {3,1,5,2};
+    int importances[3] = {1,1,1};
     t.importances = importances;
-    printf("%f \n %f \n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
 }
 
 int main()  
