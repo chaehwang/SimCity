@@ -51,7 +51,11 @@ float *bruteforce (town t, int edges)
         //rc.roads = all;
         rc.degree = degree(all,t.n);
         // TODO: free times and traffic_dist
-        rc.optimality = times_to_optimality(t, times(traffic_dist(t,rc,t.n),t.n));
+        float *td = traffic_dist(t, rc, rc.n);
+        float *times_matrix = times(td, rc.n);
+        rc.optimality = times_to_optimality(t, times_matrix);
+        free(td);
+        free(times_matrix);
         
         if (connected(rc))
         {
@@ -86,7 +90,6 @@ void test_bruteforce()
 
 int main()  
 { 
-  test_bruteforce();
   town test_town;
   test_town.n = 6;
   test_town.importances = malloc(test_town.n * sizeof(int));
@@ -200,7 +203,6 @@ int main()
         }
         printf("\n");
         
-  printf("Ans2: %f\n", times_to_optimality(test_town, times(traffic_dist(test_town,r,6),6)));
   
   
   
@@ -243,7 +245,7 @@ int main()
     {
       sub_town.importances[j] = test_town.importances[j];
       for (int k = j + 1; k < i; k++)
-        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = test_town.distances[4 * j + k];
+        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = test_town.distances[6 * j + k];
     } 
     extend_platform(sub_town, cur_p, new_p);
     free(cur_p->optimal_constructions);
@@ -252,7 +254,7 @@ int main()
   }  
       
  
-  printf("5 edges: %f\n", cur_p->optimal_constructions[0].optimality);
+  printf("\n5 edges: %f\n", cur_p->optimal_constructions[0].optimality);
   printf("6 edges: %f\n", cur_p->optimal_constructions[1].optimality);
   printf("7 edges: %f\n", cur_p->optimal_constructions[2].optimality);
   printf("8 edges: %f\n", cur_p->optimal_constructions[3].optimality);
@@ -283,7 +285,7 @@ int main()
     printf("%d\n", test[i]);
   }
   printf("%d\n", sizeof(int)); */
-  //test_bruteforce();
+  test_bruteforce();
 }
 
 
