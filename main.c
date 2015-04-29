@@ -12,9 +12,78 @@ int y(int t)
   return 3; 
 }
 
+float *bruteforce (town t)
+{
+    bool *tri = malloc((t.n*t.n-t.n)/2*sizeof(bool));
+    bool *all = malloc((t.n*t.n)*sizeof(bool));
+    float sum = 0;
+    int num = 0;
+    float *opt = malloc(sizeof(float)*2);
+    opt[0] = INFTY;
+    for (int edges = 1; edges < MAX_K; edges++)
+    {
+        for (int i=(t.n*t.n-t.n)/2-edges; i<(t.n*t.n-t.n)/2; i++)
+        {
+            tri[i]=1;
+        }
+        for (int i=0; i<(t.n*t.n-t.n)/2; i++)
+            printf("%d", tri[i]);
+        printf("\n");
+        do
+        {
+            int counter = 0;
+            for (int i=0; i<t.n;i++)
+            {
+                for(int j=0; j<=i;j++)
+                {
+                    if (i==j)
+                    {
+                        all[t.n*i+j] = 0;
+                    }
+                    else
+                    {
+                        all[t.n*i+j] = all[t.n*j+i] = tri[counter];
+                    }
+                }
+            }
+            road_construction rc;
+            rc.n = t.n;
+            rc.m = edges;
+            rc.roads = all;
+            rc.degree = degree(all,t.n);
+            rc.optimality = times_to_optimality(t, times(traffic_dist(t,rc,t.n),t.n));
+            
+            if (connected(rc))
+            {
+                sum+= rc.optimality;
+                num++;
+                if (rc.optimality < opt[0])
+                    opt[0] = rc.optimality;
+            }  
+            next(tri, t.n);
+        }
+        while (!full(tri, t.n, edges));
+    }
+    opt[1] = sum/num;
+    //free(tri);
+    //free(all);
+    return opt;
+}
+
+void test_bruteforce()
+{
+    town t;
+    t.n = 3;
+    float dist[16] = {0,1,2,3,1,0,4,5,2,4,0,6,3,5,6,0};
+    t.distances = dist;
+    int importances[4] = {3,1,5,2};
+    t.importances = importances;
+    printf("%f \n %f \n", bruteforce(t)[0], bruteforce(t)[1]);
+}
+
 int main()  
 { 
-  platform *test = malloc(sizeof(platform));
+  /*platform *test = malloc(sizeof(platform));
   *test = new_platform(5);
   printf("%d, %d", test->min_m, test->max_m);
   
@@ -24,7 +93,7 @@ int main()
  // *x = y(3);
   printf("HERE: %d", x->importances[3]);
   
-  
+  */
   /* int *test = malloc(12 * sizeof(road_construction)); */
   
   /* if (test[0] == NULL)
@@ -36,59 +105,7 @@ int main()
     printf("%d\n", test[i]);
   }
   printf("%d\n", sizeof(int)); */
+  test_bruteforce();
 }
 
-float *bruteforce (town t)
-{
-    int *tri = malloc((t.n*t.n-t.n)/2*sizeof(int));
-    int *all = malloc((t.n*t.n)*sizeof(bool));
-    float sum;
-    int num;
-    float *opt = malloc(sizeof(float)*2);
-    for (int edges = 1; edges < MAX_K; edges++)
-    {
-        for (int i=t.n-edges; i<t.n; i++)
-        {
-            tri[i]=1;
-        }
-        do
-        {
-            int counter = 0;
-            for (int i=0; i<t.n;i++)
-            {
-                for(int j=0; j<=i;j++)
-                {
-                    if i=j
-                    {
-                        all[n*i+j] = 0;
-                    }
-                    else
-                    {
-                        all[n*i+j] = all[n*j+i] = tri[counter];
-                    }
-                }
-            }
-            road_construction rc;
-            rc.n = t.n;
-            rc.m = edges;
-            rc.roads = all;
-            rc.degree = degree(all,t.n);
-            rc.optimality = times_to_optimality(t, times(traffic_dist(t,rc,t.n),t.n));
-            
-            if(connected rc)
-            {
-                sum+= rc.optimality;
-                num++;
-                if (rc.optimality < minopt)
-                    opt[0] = rc.optimality;
-                opt[1] = sum/num;
-            }  
-            next(tri, t.n);
-        }
-        while (!full(tri, t.n, edges))
-    }
-    free(tri);
-    free(all);
-    return opt
-}
 
