@@ -51,13 +51,13 @@ bool connected(road_construction rc)
   return true;
 }
 
-int *degree(road_construction rc)
+int *degree(bool *roads, int n)
 {
-  int *node_degree = malloc(rc.n * sizeof(int));
-  for (int i = 0; i < rc.n; i++)
+  int *node_degree = malloc(n * sizeof(int));
+  for (int i = 0; i < n; i++)
   {
-    for (int j = i + 1; j < rc.n; j++)
-      if (rc.roads[rc.n * i + j])
+    for (int j = i + 1; j < n; j++)
+      if (roads[n * i + j])
       {
         node_degree[i]++;
         node_degree[j]++;
@@ -93,7 +93,7 @@ void test_degrees()
   road_construction rc;
   rc.roads = roads;
   rc.n = 5;
-  int *degrees = degree(rc);
+  int *degrees = degree(rc.roads, rc.n);
   for (int i = 0; i < 5; i++)
     printf("%d ", degrees[i]);
  // free(degrees);
@@ -123,16 +123,12 @@ float *traffic_dist(town t, road_construction c, int n)
    return dist;
 }
 
-float min(float n1, float n2)
+float min_f(float n1, float n2)
 {
   if (n1 < n2)
-  {
     return n1;
-  }
   else
-  {
     return n2;
-  }
 }
 
 float *times(float *td, int n)
@@ -150,7 +146,7 @@ float *times(float *td, int n)
       {
         if (i != j)
         {
-          time_matrix[n*i+j] = time_matrix[n*j+i] = min(time_matrix[n*i+j],
+          time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
             time_matrix[n*i+k]+td[n*k+j]);
         }
       }
