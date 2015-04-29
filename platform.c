@@ -25,22 +25,30 @@ void next(bool *array, int n)
     array[i] = 1;
 }
 
-platform new_platform(int n)
+int min(int n1, int n2)
 {
-  platform new_p;
-  new_p.n = n;
-  new_p.min_m = n - 1;
-  new_p.max_m = n * MAX_K / 2;
-  int num_to_create = new_p.max_m - new_p.min_m + 1;
-  new_p.optimal_constructions = 
+  if (n1 <= n2)
+    return n1;
+  else
+    return n2;
+}
+
+platform *new_platform(int n)
+{
+  platform *new_p = malloc(sizeof(platform));
+  new_p->n = n;
+  new_p->min_m = n - 1;
+  new_p->max_m = min(n * MAX_K / 2, (n * n - n)/2);
+  int num_to_create = new_p->max_m - new_p->min_m + 1;
+  new_p->optimal_constructions = 
     malloc(num_to_create * sizeof(road_construction));
   for (int i = 0; i < num_to_create; i++)
   {
-    new_p.optimal_constructions[i].n = n;
-    new_p.optimal_constructions[i].m = i + new_p.min_m;
-    new_p.optimal_constructions[i].degree = malloc(n * sizeof(int));
-    new_p.optimal_constructions[i].roads = malloc(n * n * sizeof(bool));
-    new_p.optimal_constructions[i].optimality = INFTY;
+    new_p->optimal_constructions[i].n = n;
+    new_p->optimal_constructions[i].m = i + new_p->min_m;
+    new_p->optimal_constructions[i].degree = malloc(n * sizeof(int));
+    new_p->optimal_constructions[i].roads = malloc(n * n * sizeof(bool));
+    new_p->optimal_constructions[i].optimality = INFTY;
   }
   return new_p;
 }
@@ -58,9 +66,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
   {
     bool *roads = malloc(rc.n * sizeof(bool));
     for (int i = rc.n - edges; i < rc.n; i++)
-    {
       roads[i] = 1;
-    }
    
     while(true)
     {
@@ -97,13 +103,8 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         }
       if (max_k_exceeded)
       {
-        if(full(roads, rc.n, edges))
-         break;
-        else
-        {
           next(roads, rc.n);
           continue;
-        }
       }
       else 
       {
@@ -119,7 +120,6 @@ void extend_rc(town t, road_construction rc, platform *new_p)
           next(roads, rc.n);
       }
     }
-    
     free(roads);
   }
 }

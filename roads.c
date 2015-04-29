@@ -123,16 +123,12 @@ float *traffic_dist(town t, road_construction c, int n)
    return dist;
 }
 
-float min(float n1, float n2)
+float min_f(float n1, float n2)
 {
   if (n1 < n2)
-  {
     return n1;
-  }
   else
-  {
     return n2;
-  }
 }
 
 float *times(float *td, int n)
@@ -150,7 +146,7 @@ float *times(float *td, int n)
       {
         if (i != j)
         {
-          time_matrix[n*i+j] = time_matrix[n*j+i] = min(time_matrix[n*i+j],
+          time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
             time_matrix[n*i+k]+td[n*k+j]);
         }
       }
