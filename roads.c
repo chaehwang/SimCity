@@ -148,7 +148,7 @@ float *times(float *td, int n)
         if (i != j)
         {
           time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
-            time_matrix[n*i+k]+td[n*k+j]);
+            time_matrix[n*i+k]+time_matrix[n*k+j]);
         }
       }
     }

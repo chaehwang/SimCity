@@ -11,16 +11,16 @@ int y(int t)
 { 
   return 3;  
 }
-  
+
 float *bruteforce (town t, int edges)
 {
+    
     bool *tri = calloc((t.n*t.n-t.n)/2, sizeof(bool));
     bool *all = calloc((t.n*t.n), sizeof(bool));
     float sum = 0;
     int num = 0;
     float *opt = calloc(2, sizeof(float));  
     opt[0] = INFTY;
-
     for (int i = (t.n*t.n-t.n)/2 - edges; i < (t.n*t.n-t.n)/2; i++)
     {
         tri[i] = 1;
@@ -102,11 +102,6 @@ float *bruteforce (town t, int edges)
             sum+= rc.optimality;
             num++;
             if (rc.optimality < opt[0])
-
-            //printf("%f ", rc.optimality);
-
-        
-
             {     
               opt[0] = rc.optimality;
               /* printf("\n");
@@ -128,7 +123,9 @@ float *bruteforce (town t, int edges)
         /*for (int i = 0; i < (t.n*t.n-t.n)/2; i++)
             printf("%d", tri[i]);
         printf(" ");*/
-        free(rc.roads);  
+        free(rc.roads); 
+        if(full(tri, (t.n*t.n-t.n)/2, edges))
+            break;
         next(tri, (t.n*t.n-t.n)/2);
     }
     opt[1] = sum/num;
@@ -137,23 +134,19 @@ float *bruteforce (town t, int edges)
     return opt;
 }
 
-
-void test_bruteforce()
+void test_bruteforce(town t)
 {
-    town t;
-
-    t.n = 6;
-    float dist[36] = {0,1,3,2,1,1,1,0,9,4,3,1,3,9,0,2,3,2,2,4,2,0,6,1,1,3,3,6,0,3,1,1,2,1,3,0};
-    t.distances = dist;
-    int importances[6] = {1,1,1,1,1,1};
-    t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,7)[0], bruteforce(t,7)[1]);
+    //town t;
+    //t.n = 3;
+    //float dist[9] = {0,1,1,1,0,1,1,1,0};
+    //t.distances = dist;
+    //int importances[3] = {1,1,1};
+    //t.importances = importances;
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
 }
 
 int main()  
 { 
- 
-  //test_distance();
   town test_town;
   test_town.n = 6;
   test_town.importances = malloc(test_town.n * sizeof(int));
@@ -243,7 +236,6 @@ int main()
   r.roads[34] = 1;
   r.roads[35] = 0;
   
-    
   for (int i = 0; i < 6; i++)
         { 
           printf("\n"); 
@@ -298,9 +290,7 @@ int main()
     extend_platform(sub_town, cur_p, new_p);
     
     */
-
-   /* 
-
+   
   for (int i = 3; i <= 6; i++) 
   {
     platform *new_p = new_platform(i);
@@ -319,7 +309,7 @@ int main()
     free(cur_p);
     cur_p = new_p;    
   }  
-     
+      
  
   printf("\n5 edges: %f\n", cur_p->optimal_constructions[0].optimality);
   printf("6 edges: %f\n", cur_p->optimal_constructions[1].optimality);
@@ -329,7 +319,7 @@ int main()
   printf("10 edges: %f\n", cur_p->optimal_constructions[5].optimality);
   printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  
    
-   bool *arr = malloc(3 * sizeof(bool));
+  /* bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
   next(arr, 3);
   for (int i = 0; i < 3; i++)
@@ -350,11 +340,54 @@ int main()
   for (int i = 0; i < 12; i++)
   { 
     printf("%d\n", test[i]);
-  } 
+  }
   printf("%d\n", sizeof(int)); */
-  test_bruteforce();
-
+  ///test_bruteforce();
+  int nodes=  0.0f;
+  printf("Number of Nodes: ");
+  scanf("%d", &nodes);
+  printf("Number of Nodes is :%d ", nodes);
   
+  float *dist = malloc(nodes*nodes*sizeof(float));
+  float *temp = malloc((nodes*nodes-nodes)/2*sizeof(float));
+  printf("\nPlease input your distance matrix and press enter after each\n");
+  for(int i=0; i<(nodes*nodes-nodes)/2; i++)
+  {
+    printf("This is the %dth index: ",i);
+    scanf("%f", &temp[i]);
+  }
+  int counter= 0;
+  for(int i=0; i<nodes; i++)
+  {
+    for(int j =0; j<i; j++)
+    {
+        dist[nodes*i+j]=dist[nodes*j+i] = temp[counter];
+        counter++;
+    }
+  }
+  
+  int *importance = malloc(nodes*sizeof(int));
+  printf("\n Thank you! Now we need you to input importance matrix\n");
+  for(int i=0; i<nodes; i++)
+  {
+    printf("Importance of %dth node: ", i+1);
+    scanf("%d", &importance[i]);
+  }
+  
+  for(int i=0; i<nodes; i++)
+  {
+    for(int j=0; j<nodes; j++)
+    {
+        printf("%f ", dist[nodes*i+j]);
+    }
+    printf("\n");
+  }
+  town t; 
+  t.importances = importance;
+  t.distances = dist;
+  t.n = nodes;
+  test_bruteforce(t);
+  /* 
   float arr[36] = 
   {0,1,1,0,1,0,
    1,0,1,0,1,0,
@@ -362,8 +395,5 @@ int main()
    0,0,0,0,1,1,
    1,1,0,1,0,0,
    0,0,0,1,0,0};
+   */
 }
-
-
- 
-
