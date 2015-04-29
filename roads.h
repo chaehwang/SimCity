@@ -19,7 +19,8 @@ typedef struct {
 } road_construction;
 
 bool connected(road_construction rc);
-int *degree(road_construction c);
+/// int *degree(road_construction c);
+int *degree(bool *roads, int n);
 float *traffic_dist(town t, road_construction c, int n);
 float *times(float *td, int n);
 float times_to_optimality(town t, float *times);

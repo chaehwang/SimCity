@@ -8,8 +8,8 @@ typedef struct {
 } hi; 
 
 int y(int t)
-{
-  return 3;
+{ 
+  return 3; 
 }
 
 int main()  

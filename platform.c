@@ -45,14 +45,14 @@ platform new_platform(int n)
   return new_p;
 }
 
-void extend_platform(platform *old_p, platform *new_p)
+void extend_platform(town t, platform *old_p, platform *new_p)
 {
   int num_to_extend = old_p->max_m - old_p->min_m + 1;
   for (int i = 0; i < num_to_extend; i++)
-    extend_rc(old_p->optimal_constructions[i], new_p);
+    extend_rc(t, old_p->optimal_constructions[i], new_p);
 }
 
-void extend_rc(road_construction rc, platform *new_p)
+void extend_rc(town t, road_construction rc, platform *new_p)
 {
   for (int edges = 1; edges <= MAX_K; edges++)
   {
@@ -105,12 +105,13 @@ void extend_rc(road_construction rc, platform *new_p)
           continue;
         }
       }
-        
-        
-        // TODO: calculate optimality here
       else 
       {
-        
+        float *td = traffic_dist(t, new_rc, new_rc.n);
+        float *times_matrix = times(td, new_rc.n);
+        new_rc.optimality = times_to_optimality(t, times_matrix);
+        free(td);
+        free(times_matrix);
         add_rc(new_rc, new_p);        
         if(full(roads, rc.n, edges))
           break;
