@@ -48,44 +48,52 @@ float *bruteforce (town t, int edges)
         rc.roads = malloc(t.n * t.n * sizeof(bool));
         for (int i = 0; i < t.n*t.n; i++)
           rc.roads[i] = all[i];
+        if (!connected(rc))
+        {
+          free(rc.roads);
+          if (full(tri, (t.n*t.n-t.n)/2, edges))
+            break;
+          next(tri, (t.n*t.n-t.n)/2);
+          continue;
+        }
+          
         //rc.roads = all;
         rc.degree = degree(all,t.n);
         // TODO: free times and traffic_dist
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
         rc.optimality = times_to_optimality(t, times_matrix);
+        //printf("Before: %f \n", rc.optimality);
         free(td);
         free(times_matrix);
+        //printf("After: %f \n", rc.optimality);
         
-        if (connected(rc))
-        {
+        
             sum+= rc.optimality;
             num++;
             if (rc.optimality < opt[0])
                 opt[0] = rc.optimality;
-        }
         /*for (int i = 0; i < (t.n*t.n-t.n)/2; i++)
             printf("%d", tri[i]);
-        printf(" ");*/  
-        if (full(tri, (t.n*t.n-t.n)/2, edges))
-            break;
+        printf(" ");*/
+        free(rc.roads);  
         next(tri, (t.n*t.n-t.n)/2);
     }
     opt[1] = sum/num;
-    //free(tri);
-    //free(all);
+    free(tri);
+    free(all);
     return opt;
 }
 
 void test_bruteforce()
 {
     town t;
-    t.n = 4;
-    float dist[16] = {0,3,5,7,3,0,3,9,5,3,0,5,7,9,5,0};
+    t.n = 6;
+    float dist[36] = {0,1,3,2,1,1,1,0,9,4,3,1,3,9,0,2,3,2,2,4,2,0,6,1,1,3,3,6,0,3,1,1,2,1,3,0};
     t.distances = dist;
-    int importances[4] = {1,1,1,1};
+    int importances[6] = {1,1,1,1,1,1};
     t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,6)[0], bruteforce(t,6)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,8)[0], bruteforce(t,8)[1]);
 }
 
 int main()  
@@ -233,7 +241,7 @@ int main()
     extend_platform(sub_town, cur_p, new_p);
     
     */
-    
+   /* 
   for (int i = 3; i <= 6; i++) 
   {
     platform *new_p = new_platform(i);
@@ -260,7 +268,7 @@ int main()
   printf("8 edges: %f\n", cur_p->optimal_constructions[3].optimality);
   printf("9 edges: %f\n", cur_p->optimal_constructions[4].optimality);
   printf("10 edges: %f\n", cur_p->optimal_constructions[5].optimality);
-  printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  
+  printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  */
    
   /* bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
