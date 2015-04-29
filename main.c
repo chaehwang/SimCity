@@ -14,40 +14,33 @@ int y(int t)
   
 float *bruteforce (town t, int edges)
 {
-    bool *tri = malloc((t.n*t.n-t.n)/2*sizeof(bool));
-    bool *all = malloc((t.n*t.n)*sizeof(bool));
+    bool *tri = calloc((t.n*t.n-t.n)/2, sizeof(bool));
+    bool *all = calloc((t.n*t.n), sizeof(bool));
     float sum = 0;
     int num = 0;
-    float *opt = malloc(sizeof(float)*2);
+    float *opt = calloc(2, sizeof(float));  
     opt[0] = INFTY;
 
-    for (int i=(t.n*t.n-t.n)/2-edges; i<(t.n*t.n-t.n)/2; i++)
+    for (int i = (t.n*t.n-t.n)/2 - edges; i < (t.n*t.n-t.n)/2; i++)
     {
-        tri[i]=1;
-    } 
+        tri[i] = 1;
+    }
     while(true)
     {
         int counter = 0;
-        for (int i=0; i<t.n;i++)
+        for (int i = 1; i < t.n; i++)
         {
-            for(int j=0; j<=i;j++)
+            for(int j = 0; j < i; j++)
             {
-                if (i==j)
-                {
-                    all[t.n*i+j] = 0;
-                }
-                else
-                {
-                    all[t.n*i+j] = all[t.n*j+i] = tri[counter];
-                    counter++;
-                }
+              all[t.n * i + j] = all[t.n * j + i] = tri[counter];
+              counter++;
             }
         }
         road_construction rc;
         rc.n = t.n;
         rc.m = edges;
-        rc.roads = malloc(t.n * t.n * sizeof(bool));
-        for (int i = 0; i < t.n*t.n; i++)
+        rc.roads = calloc(t.n * t.n, sizeof(bool));
+        for (int i = 0; i < t.n * t.n; i++)
           rc.roads[i] = all[i];
         if (!connected(rc))
         {
@@ -60,11 +53,47 @@ float *bruteforce (town t, int edges)
           
         //rc.roads = all;
         rc.degree = degree(all,t.n);
-        // TODO: free times and traffic_dist
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
         rc.optimality = times_to_optimality(t, times_matrix);
+        
+        if(rc.optimality > 200)
+        {
+          printf("\nALL:");
+          for (int i = 0; i < t.n; i++)
+          {
+          printf("\n");
+          for (int j = 0; j < t.n; j++)
+            printf("%d ", all[t.n * i + j]);
+          }
+          printf("\nTD:");
+          for (int i = 0; i < t.n; i++)
+          {
+          printf("\n");
+          for (int j = 0; j < t.n; j++)
+            printf("%f ", td[t.n * i + j]);
+          }
+          printf("\ntimes_matrix:");
+          for (int i = 0; i < t.n; i++)
+          {
+          printf("\n");
+          for (int j = 0; j < t.n; j++)
+            printf("%f ", times_matrix[t.n * i + j]);
+          }
+          printf("Optimality: %f\n", rc.optimality);
+          printf("Is connected?: %d\n", connected(rc));
+        }
+        
+        /*printf("\nTimes:\n");
+        for (int i = 0; i < t.n; i++)
+        {
+          printf("\n");
+          for (int j = 0; j < t.n; j++)
+            printf("%f ", times_matrix[t.n * i + j]);
+        } */
+        
         //printf("Before: %f \n", rc.optimality);
+        free(rc.degree);
         free(td);
         free(times_matrix);
         //printf("After: %f \n", rc.optimality);
@@ -73,29 +102,38 @@ float *bruteforce (town t, int edges)
             sum+= rc.optimality;
             num++;
             if (rc.optimality < opt[0])
-                opt[0] = rc.optimality;
-<<<<<<< HEAD
+
             //printf("%f ", rc.optimality);
 
-        }
-=======
->>>>>>> 6cb6d7bb2c89b381206ac84b2fb74d46be674062
+        
+
+            {     
+              opt[0] = rc.optimality;
+              /* printf("\n");
+              for (int i = 0; i < t.n; i++)
+                printf("%d ", rc.degree[i]);
+              printf("\nTri");
+              for (int i = 0; i < (t.n * t.n - t.n)/2; i++)
+                printf("%d ", tri[i]);
+              printf("\nAll");
+              printf("\n");
+              for (int i = 0; i < t.n; i++)
+              {
+                for (int j = 0; j < t.n; j++)
+                printf("%d ", all[t.n*i+j]);
+                printf("\n");
+              } */
+            }
+          
         /*for (int i = 0; i < (t.n*t.n-t.n)/2; i++)
             printf("%d", tri[i]);
         printf(" ");*/
         free(rc.roads);  
         next(tri, (t.n*t.n-t.n)/2);
     }
-<<<<<<< HEAD
-    opt[1] = sum/num;  
-
-    //free(tri);
-    //free(all);
-=======
     opt[1] = sum/num;
     free(tri);
     free(all);
->>>>>>> 6cb6d7bb2c89b381206ac84b2fb74d46be674062
     return opt;
 }
 
@@ -103,18 +141,13 @@ float *bruteforce (town t, int edges)
 void test_bruteforce()
 {
     town t;
-<<<<<<< HEAD
 
-    t.n = 4;
-    float dist[16] = {0,3,5,7,3,0,3,9,5,3,0,5,7,9,5,0};
-=======
     t.n = 6;
     float dist[36] = {0,1,3,2,1,1,1,0,9,4,3,1,3,9,0,2,3,2,2,4,2,0,6,1,1,3,3,6,0,3,1,1,2,1,3,0};
->>>>>>> 6cb6d7bb2c89b381206ac84b2fb74d46be674062
     t.distances = dist;
     int importances[6] = {1,1,1,1,1,1};
     t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,8)[0], bruteforce(t,8)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,7)[0], bruteforce(t,7)[1]);
 }
 
 int main()  
@@ -226,14 +259,14 @@ int main()
         float *times_matrix = times(td, 6);
         printf("Ans: %f\n", times_to_optimality(test_town, times_matrix));
         
-        printf("\n TD Matrix: ");
+        /* printf("\n TD Matrix: ");
         for (int i = 0; i < 6; i++)
         { 
           printf("\n"); 
           for (int j = 0; j < 6; j++)
             printf("%f ", td[6 * i + j]);
         }
-        printf("\n");
+        printf("\n"); */
         
   
   
@@ -265,18 +298,16 @@ int main()
     extend_platform(sub_town, cur_p, new_p);
     
     */
-<<<<<<< HEAD
-  
-=======
+
    /* 
->>>>>>> 6cb6d7bb2c89b381206ac84b2fb74d46be674062
+
   for (int i = 3; i <= 6; i++) 
   {
     platform *new_p = new_platform(i);
     town sub_town; 
     sub_town.n = i;
-    sub_town.distances = malloc(i * i * sizeof(float));
-    sub_town.importances = malloc(i * sizeof(int));
+    sub_town.distances = calloc(i * i, sizeof(float));
+    sub_town.importances = calloc(i, sizeof(int));
     for (int j = 0; j < i; j++)
     {
       sub_town.importances[j] = test_town.importances[j];
@@ -296,9 +327,9 @@ int main()
   printf("8 edges: %f\n", cur_p->optimal_constructions[3].optimality);
   printf("9 edges: %f\n", cur_p->optimal_constructions[4].optimality);
   printf("10 edges: %f\n", cur_p->optimal_constructions[5].optimality);
-  printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  */
+  printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  
    
-  /* bool *arr = malloc(3 * sizeof(bool));
+   bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
   next(arr, 3);
   for (int i = 0; i < 3; i++)
@@ -323,6 +354,14 @@ int main()
   printf("%d\n", sizeof(int)); */
   test_bruteforce();
 
+  
+  float arr[36] = 
+  {0,1,1,0,1,0,
+   1,0,1,0,1,0,
+   1,1,0,0,0,0,
+   0,0,0,0,1,1,
+   1,1,0,1,0,0,
+   0,0,0,1,0,0};
 }
 
 

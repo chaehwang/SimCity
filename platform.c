@@ -41,13 +41,13 @@ platform *new_platform(int n)
   new_p->max_m = min(n * MAX_K / 2, (n * n - n)/2);
   int num_to_create = new_p->max_m - new_p->min_m + 1;
   new_p->optimal_constructions = 
-    malloc(num_to_create * sizeof(road_construction));
+    calloc(num_to_create, sizeof(road_construction));
   for (int i = 0; i < num_to_create; i++)
   {
     new_p->optimal_constructions[i].n = n;
     new_p->optimal_constructions[i].m = i + new_p->min_m;
-    new_p->optimal_constructions[i].degree = malloc(n * sizeof(int));
-    new_p->optimal_constructions[i].roads = malloc(n * n * sizeof(bool));
+    new_p->optimal_constructions[i].degree = calloc(n, sizeof(int));
+    new_p->optimal_constructions[i].roads = calloc(n * n, sizeof(bool));
     new_p->optimal_constructions[i].optimality = INFTY;
   }
   return new_p;
@@ -66,30 +66,30 @@ void extend_rc(town t, road_construction rc, platform *new_p)
   {
     if (rc.n < edges) 
       break;
-    bool *roads = malloc(rc.n * sizeof(bool));
+    bool *roads = calloc(rc.n, sizeof(bool));
     for (int i = 0; i < rc.n; i++)
       roads[i] = 0;
     for (int i = rc.n - edges; i < rc.n; i++)
       roads[i] = 1;
       
-    printf("Original: %d", edges);
+    /* printf("Original: %d", edges);
     for (int i = 0; i < rc.n; i++)
     {
       printf("\n");
       for (int j = 0; j < rc.n; j++)
         printf("%d ", rc.roads[rc.n * i + j]);
-    }
+    } */
    
     while(true)
     {
       road_construction new_rc;
       new_rc.n = rc.n + 1;
       new_rc.m = rc.m + edges;
-      new_rc.degree = malloc((rc.n + 1) * sizeof(int));
+      new_rc.degree = calloc(rc.n + 1, sizeof(int));
       for (int i = 0; i < rc.n; i++)
         new_rc.degree[i] = rc.degree[i];
       new_rc.degree[rc.n] = edges;
-      new_rc.roads = malloc(new_rc.n * new_rc.n * sizeof(bool));
+      new_rc.roads = calloc(new_rc.n * new_rc.n, sizeof(bool));
 
       for (int i = 0; i < new_rc.n; i++)
         for (int j = 0; j < new_rc.n; j++)
@@ -131,7 +131,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
       {
         if(full(roads, rc.n, edges))
           break;
-        next(roads, rc.n); printf("Continue\n");
+        next(roads, rc.n); // printf("Continue\n");
         continue;
       }
       else 
@@ -139,7 +139,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         float *td = traffic_dist(t, new_rc, new_rc.n);
         float *times_matrix = times(td, new_rc.n);
         new_rc.optimality = times_to_optimality(t, times_matrix);
-        for (int i = 0; i < new_rc.n; i++)
+        /*for (int i = 0; i < new_rc.n; i++)
         { 
           printf("\n"); 
           for (int j = 0; j < new_rc.n; j++)
@@ -157,7 +157,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
             printf("%f ", td[new_rc.n * i + j]);
         }
         printf("\n");
-        printf("(Graph above): Here: %d, %f\n", edges, new_rc.optimality);
+        printf("(Graph above): Here: %d, %f\n", edges, new_rc.optimality); */
         free(td);
         free(times_matrix);
         add_rc(new_rc, new_p);        
@@ -170,7 +170,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
     free(roads);
   }
   
-  printf("Town information: distances: \n");
+  /* printf("Town information: distances: \n");
   for (int i = 0; i < t.n; i++)
   {
     printf("\n");
@@ -178,7 +178,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
     {
       printf("%f ", t.distances[t.n * i + j]);
     }
-  }
+  } */
 }
 
 // adds a road construction to the new platform if the road 

@@ -7,10 +7,10 @@ bool connected(road_construction rc)
   int n = rc.n;
   // boolean for a node is connected to a base node. the graph
   // is connected if this is true for all node
-  bool *connected_to_b0 = malloc(n * sizeof(bool));
+  bool *connected_to_b0 = calloc(n, sizeof(bool));
   // boolean for if we have already made all neighbors of this
   // node have connected_to_b0 value of false
-  bool *checked = malloc(n * sizeof(bool));
+  bool *checked = calloc(n, sizeof(bool));
   
   
   connected_to_b0[0] = true;
@@ -53,7 +53,8 @@ bool connected(road_construction rc)
 
 int *degree(bool *roads, int n)
 {
-  int *node_degree = malloc(n * sizeof(int));
+  int *node_degree = calloc(n, sizeof(int));
+  
   for (int i = 0; i < n; i++)
   {
     for (int j = i + 1; j < n; j++)
@@ -101,7 +102,7 @@ void test_degrees()
 
 float *traffic_dist(town t, road_construction c, int n)
 {
-  float *dist = malloc(n * n * sizeof(float));
+  float *dist = calloc(n * n, sizeof(float));
     
   for(int i = 0; i<n; i++)
   {
@@ -133,7 +134,7 @@ float min_f(float n1, float n2)
 
 float *times(float *td, int n)
 {
-  float *time_matrix = malloc(n*n*sizeof(float));
+  float *time_matrix = calloc(n * n, sizeof(float));
   for (int r = 0; r < n*n; r++)
   {
     time_matrix[r] = td[r];
@@ -204,8 +205,10 @@ float times_to_optimality(town t, float *times)
     {
       //if(times[n*i+j]!=INFTY)
       sum += times[n * i + j] * (log ((float)(t.importances[i] + t.importances[j])));
-    }
+    } 
   }
+
+  
 
   return sum;
 }
