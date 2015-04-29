@@ -19,7 +19,7 @@ float *bruteforce (town t, int edges)
     float sum = 0;
     int num = 0;
     float *opt = malloc(sizeof(float)*2);
-    opt[0] = 100;
+    opt[0] = INFTY;
 
     for (int i=(t.n*t.n-t.n)/2-edges; i<(t.n*t.n-t.n)/2; i++)
     {
@@ -242,7 +242,7 @@ int main()
     extend_platform(sub_town, cur_p, new_p);
     
     */
-    
+  
   for (int i = 3; i <= 6; i++) 
   {
     platform *new_p = new_platform(i);
@@ -261,7 +261,7 @@ int main()
     free(cur_p);
     cur_p = new_p;    
   }  
-      
+     
  
   printf("\n5 edges: %f\n", cur_p->optimal_constructions[0].optimality);
   printf("6 edges: %f\n", cur_p->optimal_constructions[1].optimality);
