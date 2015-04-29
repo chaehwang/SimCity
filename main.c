@@ -38,3 +38,42 @@ int main()
   printf("%d\n", sizeof(int)); */
 }
 
+float bruteforce (town t)
+{
+    int *tri = malloc((t.n*t.n-t.n)/2*sizeof(int));
+    int *all = malloc((t.n*t.n)*sizeof(bool));
+    for (int edges = 1; edges < K_MAX; edges++)
+    {
+        for (int i=t.n-edges; i<t.n; i++)
+        {
+            tri[i]=1;
+        }
+        do
+        {
+            int counter = 0;
+            for (int i=0; i<t.n;i++)
+            {
+                for(int j=0; j<=i;j++)
+                {
+                    if (i=j)
+                    {
+                        all[n*i+j] = 0;
+                    }
+                    else
+                    {
+                        all[n*i+j] = all[n*j+i] = tri[counter];
+                    }
+                }
+            }
+            road_construction rc;
+            rc.n = t.n;
+            rc.m = edges;
+            rc.degrees = degree(all,t.n);
+            rc.roads = all;
+            
+            next(tri, t.n);
+        }
+        while (!full(tri, t.n, edges))
+    }
+}
+
