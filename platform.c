@@ -64,6 +64,8 @@ void extend_rc(town t, road_construction rc, platform *new_p)
 {
   for (int edges = 1; edges <= MAX_K; edges++)
   {
+    if (rc.n < edges) 
+      break;
     bool *roads = malloc(rc.n * sizeof(bool));
     for (int i = rc.n - edges; i < rc.n; i++)
       roads[i] = 1;
@@ -98,19 +100,20 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         {
           free(new_rc.degree);
           free(new_rc.roads);
-          max_k_exceeded = true;
+          max_k_exceeded = true; printf("breaK3");
           break;
         }
       if (max_k_exceeded)
       {
-          next(roads, rc.n);
-          continue;
+        next(roads, rc.n); printf("continue9");
+        continue;
       }
       else 
       {
         float *td = traffic_dist(t, new_rc, new_rc.n);
         float *times_matrix = times(td, new_rc.n);
         new_rc.optimality = times_to_optimality(t, times_matrix);
+        printf("Here %f\n", new_rc.optimality);
         free(td);
         free(times_matrix);
         add_rc(new_rc, new_p);        

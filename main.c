@@ -76,18 +76,18 @@ float *bruteforce (town t, int edges)
 void test_bruteforce()
 {
     town t;
-    t.n = 3;
-    float dist[9] = {0,3,5,3,0,3,5,3,0};
+    t.n = 4;
+    float dist[16] = {0,3,5,7,3,0,3,9,5,3,0,5,7,9,5,0};
     t.distances = dist;
-    int importances[3] = {1,1,1};
+    int importances[4] = {1,1,1,1};
     t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,3)[0], bruteforce(t,3)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,6)[0], bruteforce(t,6)[1]);
 }
 
 int main()  
 { 
   test_bruteforce();
-  /*town test_town;
+  town test_town;
   test_town.n = 4;
   test_town.importances = malloc(test_town.n * sizeof(int));
   for (int i = 0; i < 4; i++)
@@ -118,7 +118,7 @@ int main()
   cur_p->optimal_constructions[0].roads[3] = 1;
   //printf("%d, %d", test.min_m, test.max_m);
        
-    platform *new_p = new_platform(3);
+    /*platform *new_p = new_platform(3);
     town sub_town;
     sub_town.n = 3;
     sub_town.distances = malloc(3 * 3 * sizeof(float));
@@ -133,10 +133,10 @@ int main()
     
     printf("HI"); */
   
-  /*for (int i = 3; i <= 4; i++)
+  for (int i = 3; i <= 3; i++)
   {
-    platform *new_p = malloc(sizeof(platform));
-    town sub_town;
+    platform *new_p = new_platform(i);
+    town sub_town; 
     sub_town.n = i;
     sub_town.distances = malloc(i * i * sizeof(float));
     sub_town.importances = malloc(i * sizeof(int));
@@ -147,10 +147,14 @@ int main()
         sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = test_town.distances[4 * j + k];
     } 
     extend_platform(sub_town, cur_p, new_p);
-    //free(cur_p->optimal_constructions);
-    //free(cur_p);
-    //cur_p = new_p;    
-  }  */
+    free(cur_p->optimal_constructions);
+    free(cur_p);
+    cur_p = new_p;    
+  }  
+ 
+ 
+  printf("2 edges: %f\n", cur_p->optimal_constructions[0].optimality);
+  printf("3 edges: %f\n", cur_p->optimal_constructions[1].optimality);
   
   /* bool *arr = malloc(3 * sizeof(bool));
   arr[0] = 0; arr[1] = 0; arr[2] = 1;
