@@ -25,12 +25,20 @@ void next(bool *array, int n)
     array[i] = 1;
 }
 
+int min(int n1, int n2)
+{
+  if (n1 <= n2)
+    return n1;
+  else
+    return n2;
+}
+
 platform new_platform(int n)
 {
   platform new_p;
   new_p.n = n;
   new_p.min_m = n - 1;
-  new_p.max_m = n * MAX_K / 2;
+  new_p.max_m = min(n * MAX_K / 2, (n * n - n)/2);
   int num_to_create = new_p.max_m - new_p.min_m + 1;
   new_p.optimal_constructions = 
     malloc(num_to_create * sizeof(road_construction));
@@ -58,9 +66,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
   {
     bool *roads = malloc(rc.n * sizeof(bool));
     for (int i = rc.n - edges; i < rc.n; i++)
-    {
       roads[i] = 1;
-    }
    
     while(true)
     {
