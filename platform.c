@@ -67,8 +67,18 @@ void extend_rc(town t, road_construction rc, platform *new_p)
     if (rc.n < edges) 
       break;
     bool *roads = malloc(rc.n * sizeof(bool));
+    for (int i = 0; i < rc.n; i++)
+      roads[i] = 0;
     for (int i = rc.n - edges; i < rc.n; i++)
       roads[i] = 1;
+      
+    printf("Original: %d", edges);
+    for (int i = 0; i < rc.n; i++)
+    {
+      printf("\n");
+      for (int j = 0; j < rc.n; j++)
+        printf("%d ", rc.roads[rc.n * i + j]);
+    }
    
     while(true)
     {
@@ -79,11 +89,25 @@ void extend_rc(town t, road_construction rc, platform *new_p)
       for (int i = 0; i < rc.n; i++)
         new_rc.degree[i] = rc.degree[i];
       new_rc.degree[rc.n] = edges;
-      new_rc.roads = malloc((rc.n + 1) * (rc.n + 1) * sizeof(int));
+      new_rc.roads = malloc(new_rc.n * new_rc.n * sizeof(bool));
+
+      for (int i = 0; i < new_rc.n; i++)
+        for (int j = 0; j < new_rc.n; j++)
+          new_rc.roads[new_rc.n * i + j] = 0;
+      
       for (int i = 0; i < rc.n; i++)
         for (int j = 0; j < i; j++)
-          new_rc.roads[rc.n * i + j] = new_rc.roads[rc.n * j + i] 
+          new_rc.roads[new_rc.n * i + j] = new_rc.roads[new_rc.n * j + i] 
             = rc.roads[rc.n * i + j];
+      
+      /*printf("After");
+      for (int i = 0; i < new_rc.n; i++)
+    {
+      printf("\n");
+      for (int j = 0; j < new_rc.n; j++)
+        printf("%d ", new_rc.roads[new_rc.n * i + j]);
+    } */
+        
       for (int i = 0; i < rc.n; i++)
         if (roads[i])
         {
@@ -100,12 +124,14 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         {
           free(new_rc.degree);
           free(new_rc.roads);
-          max_k_exceeded = true; printf("breaK3");
+          max_k_exceeded = true;
           break;
         }
       if (max_k_exceeded)
       {
-        next(roads, rc.n); printf("continue9");
+        if(full(roads, rc.n, edges))
+          break;
+        next(roads, rc.n); printf("Continue\n");
         continue;
       }
       else 
@@ -113,7 +139,25 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         float *td = traffic_dist(t, new_rc, new_rc.n);
         float *times_matrix = times(td, new_rc.n);
         new_rc.optimality = times_to_optimality(t, times_matrix);
-        printf("Here %f\n", new_rc.optimality);
+        for (int i = 0; i < new_rc.n; i++)
+        { 
+          printf("\n"); 
+          for (int j = 0; j < new_rc.n; j++)
+            printf("%d ", new_rc.roads[new_rc.n * i + j]);
+        }
+        printf("\n Degrees: ");
+        for (int i = 0; i < new_rc.n; i++)
+          printf("%d ", new_rc.degree[i]);
+        printf("\n");
+        printf("\n TD Matrix: ");
+        for (int i = 0; i < new_rc.n; i++)
+        { 
+          printf("\n"); 
+          for (int j = 0; j < new_rc.n; j++)
+            printf("%f ", td[new_rc.n * i + j]);
+        }
+        printf("\n");
+        printf("(Graph above): Here: %d, %f\n", edges, new_rc.optimality);
         free(td);
         free(times_matrix);
         add_rc(new_rc, new_p);        
@@ -124,6 +168,16 @@ void extend_rc(town t, road_construction rc, platform *new_p)
       }
     }
     free(roads);
+  }
+  
+  printf("Town information: distances: \n");
+  for (int i = 0; i < t.n; i++)
+  {
+    printf("\n");
+    for (int j = 0; j < t.n; j++)
+    {
+      printf("%f ", t.distances[t.n * i + j]);
+    }
   }
 }
 
