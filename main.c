@@ -80,12 +80,12 @@ float *bruteforce (town t, int edges)
 void test_bruteforce()
 {
     town t;
-    t.n = 3;
-    float dist[9] = {0,3,4,3,0,5,4,5,0};
+    t.n = 4;
+    float dist[16] = {0,3,5,7,3,0,3,9,5,3,0,5,7,9,5,0};
     t.distances = dist;
-    int importances[3] = {1,1,1};
+    int importances[4] = {1,1,1,1};
     t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,6)[0], bruteforce(t,6)[1]);
 }
 
 int main()  
@@ -178,7 +178,6 @@ int main()
   r.roads[33] = 1;
   r.roads[34] = 1;
   r.roads[35] = 0;
-
   
   for (int i = 0; i < 6; i++)
         { 
@@ -232,8 +231,9 @@ int main()
         sub_town.distances[3 * j + k] = sub_town.distances[3 * k + j] = test_town.distances[4 * j + k];
     }
     extend_platform(sub_town, cur_p, new_p);
-     */
-   
+    
+    */
+    
   for (int i = 3; i <= 6; i++) 
   {
     platform *new_p = new_platform(i);
