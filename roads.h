@@ -6,7 +6,7 @@
 
 typedef struct {
   int n;
-  float *distances;
+  int *distances;
   int *importances;
 } town;
 

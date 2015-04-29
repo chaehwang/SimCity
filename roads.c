@@ -31,7 +31,11 @@ bool connected(road_construction rc)
     
     // if no such node exists, then no other nodes are connected to b0
     if (current_node == -1)
+    {
+      free(connected_to_b0);
+      free(checked);
       return false;
+    }
     // otherwise, set connected_to_b0 for all neighbors to true
     else
     {  
@@ -48,6 +52,8 @@ bool connected(road_construction rc)
   }
   
   // if while loop was exited, then all nodes are connected to b0
+  free(connected_to_b0);
+  free(checked);
   return true;
 }
 
@@ -113,7 +119,7 @@ float *traffic_dist(town t, road_construction c, int n)
         float a1 = ((float)t.importances[j]/(float)c.degree[j]);
         float a2 = ((float)t.importances[i]/(float)c.degree[i]);
         //printf("%d and %d also %d plus %d", t.importances[i],degrees[i], t.importances[j], degrees[j]);
-        dist[n * i + j]= t.distances[n * i + j] * (1 + a1 + a2);
+        dist[n * i + j]= t.distances[n * i + j] * (1.0 + a1 + a2);
         //printf("%f", dist[n*i+j]);
       }
       else
@@ -148,7 +154,7 @@ float *times(float *td, int n)
         if (i != j)
         {
           time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
-            time_matrix[n*i+k]+td[n*k+j]);
+            time_matrix[n*i+k]+time_matrix[n*k+j]);
         }
       }
     }
@@ -176,7 +182,7 @@ void test_distance()
     rc.n = 5;
     
     town t;
-    float distance[25]= {0.0,2.0,1.0,4.0,0.0,5.0,6.0,1.0,0.0,1.0,1.0,1.0,2.0,1.0,1.0,2.0,0.0,1.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0};
+    int distance[25]= {0.0,2.0,1.0,4.0,0.0,5.0,6.0,1.0,0.0,1.0,1.0,1.0,2.0,1.0,1.0,2.0,0.0,1.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0};
     int important[5]={1,2,3,4,5};
     t.n = 5;
     t.distances = distance;
