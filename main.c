@@ -77,16 +77,17 @@ void test_bruteforce()
 {
     town t;
     t.n = 3;
-    float dist[9] = {0,3,4,3,0,5,4,5,0};
+    float dist[9] = {0,3,5,3,0,3,5,3,0};
     t.distances = dist;
     int importances[3] = {1,1,1};
     t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
+    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,3)[0], bruteforce(t,3)[1]);
 }
 
 int main()  
 { 
-  town test_town;
+  test_bruteforce();
+  /*town test_town;
   test_town.n = 4;
   test_town.importances = malloc(test_town.n * sizeof(int));
   for (int i = 0; i < 4; i++)
@@ -130,7 +131,7 @@ int main()
     }
     extend_platform(sub_town, cur_p, new_p);
     
-    printf("HI"); 
+    printf("HI"); */
   
   /*for (int i = 3; i <= 4; i++)
   {
