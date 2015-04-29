@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include "platform.h"
-
+// given an array of length n, if all edges are on the left
 bool full(bool *array, int n, int edges)
 {
   for (int i = 0; i < edges; i++)
@@ -54,7 +54,7 @@ void extend_platform(platform *old_p, platform *new_p)
 
 void extend_rc(road_construction rc, platform *new_p)
 {
-  for (int edges = 0; edges < MAX_K; edges++)
+  for (int edges = 1; edges <= MAX_K; edges++)
   {
     bool *roads = malloc(rc.n * sizeof(bool));
     for (int i = rc.n - MAX_K; i < rc.n; i++)
@@ -108,9 +108,11 @@ void extend_rc(road_construction rc, platform *new_p)
   }
 }
 
+// adds a road construction to the new platform if the road 
+// construction is better than the one stored so far
 void add_rc(road_construction rc, platform *new_p)
 {
-  int index = rc.m - new_p->n;
+  int index = rc.m - new_p->min_m;
   if (new_p->optimal_constructions[index].optimality > rc.optimality)
   {
     free(new_p->optimal_constructions[index].degree);
