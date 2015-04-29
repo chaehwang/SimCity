@@ -39,8 +39,11 @@ int main()
 
 }
 
-float bruteforce (town t)
+float *bruteforce (town t)
 {
+    float sum = malloc(sizeof(float));
+    int num = malloc(sizeof(int));
+    float opt = malloc(sizeof(float)*2);
     int *tri = malloc(sizeof(int)*(t.n*t.n*-t.n)/2);
     int *all = malloc(sizeof(int)*t.n*t.n);
     for (int edges = 1; edges < K_MAX; edges++)
@@ -66,24 +69,30 @@ float bruteforce (town t)
                     }
                 }
             }
-            road_construction rc;
-            rc.n = t.n;
-            rc.m = edges;
-            rc.degrees = 
-            
-            next(tri, t.n);
+            road_construction rc;
+            rc.n = t.n;
+            rc.m = edges;
+            rc.degrees = degrees(all, t.n)
+            rc.roads = all;
+            rc.optimality = times_to_optimality(t, times(traffic_dist(t, rc, t.n), t.n));
+            
+            if(connected rc)
+            {
+                if(rc.optimality<minopt)
+                    opt[0]=rc.optimality;
+                    
+                sum += rc.optimality;
+                num ++;
+                opt[1] = sum/num;
+            }
+            next(tri, t.n);
         }
-        while (!full(tri, t.n, edges))
+        while (!full(tri, t.n, edges))  
     }
-    
-    
-    road_construction rc;
-    rc.n = t.n;
-    rc.m = 
-    rc.degrees = 
-    rc.roads = full;
-     
-           
-    
+    free(tri);
+    free(sum);
+    free(num);
+    free(all);
+    return opt;  
 }
 
