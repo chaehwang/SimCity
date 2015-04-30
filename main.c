@@ -2,26 +2,16 @@
 #include <stdlib.h>
 #include "platform.c"
 
-typedef struct {
-  int n;
-  int *importances;
-} hi; 
-
-int y(int t)
-{ 
-  return 3;  
-}
-
 float *bruteforce (town t, int edges)
 {
-    
-    bool *tri = calloc((t.n*t.n-t.n)/2, sizeof(bool));
+    int tri_length = (t.n * t.n - t.n)/2;
+    bool *tri = calloc(tri_length, sizeof(bool));
     bool *all = calloc((t.n*t.n), sizeof(bool));
     float sum = 0;
     int num = 0;
     float *opt = calloc(2, sizeof(float));  
     opt[0] = INFTY;
-    for (int i = (t.n*t.n-t.n)/2 - edges; i < (t.n*t.n-t.n)/2; i++)
+    for (int i = tri_length - edges; i < tri_length; i++)
     {
         tri[i] = 1;
     }
@@ -45,227 +35,88 @@ float *bruteforce (town t, int edges)
         if (!connected(rc))
         {
           free(rc.roads);
-          if (full(tri, (t.n*t.n-t.n)/2, edges))
+          if (full(tri, tri_length, edges))
             break;
-          next(tri, (t.n*t.n-t.n)/2);
+          next(tri, tri_length);
           continue;
         }
           
-        //rc.roads = all;
         rc.degree = degree(all,t.n);
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
         rc.optimality = times_to_optimality(t, times_matrix);
-        
-        if(rc.optimality > 200)
-        {
-          printf("\nALL:");
-          for (int i = 0; i < t.n; i++)
-          {
-          printf("\n");
-          for (int j = 0; j < t.n; j++)
-            printf("%d ", all[t.n * i + j]);
-          }
-          printf("\nTD:");
-          for (int i = 0; i < t.n; i++)
-          {
-          printf("\n");
-          for (int j = 0; j < t.n; j++)
-            printf("%f ", td[t.n * i + j]);
-          }
-          printf("\ntimes_matrix:");
-          for (int i = 0; i < t.n; i++)
-          {
-          printf("\n");
-          for (int j = 0; j < t.n; j++)
-            printf("%f ", times_matrix[t.n * i + j]);
-          }
-          printf("Optimality: %f\n", rc.optimality);
-          printf("Is connected?: %d\n", connected(rc));
-        }
-        
-        /*printf("\nTimes:\n");
-        for (int i = 0; i < t.n; i++)
-        {
-          printf("\n");
-          for (int j = 0; j < t.n; j++)
-            printf("%f ", times_matrix[t.n * i + j]);
-        } */
-        
-        //printf("Before: %f \n", rc.optimality);
+
         free(rc.degree);
         free(td);
-        free(times_matrix);
-        //printf("After: %f \n", rc.optimality);
-        
+        free(times_matrix);      
         
             sum+= rc.optimality;
             num++;
             if (rc.optimality < opt[0])
             {     
               opt[0] = rc.optimality;
-              /* printf("\n");
-              for (int i = 0; i < t.n; i++)
-                printf("%d ", rc.degree[i]);
-              printf("\nTri");
-              for (int i = 0; i < (t.n * t.n - t.n)/2; i++)
-                printf("%d ", tri[i]);
-              printf("\nAll");
-              printf("\n");
-              for (int i = 0; i < t.n; i++)
-              {
-                for (int j = 0; j < t.n; j++)
-                printf("%d ", all[t.n*i+j]);
-                printf("\n");
-              } */
             }
           
-        /*for (int i = 0; i < (t.n*t.n-t.n)/2; i++)
-            printf("%d", tri[i]);
-        printf(" ");*/
-        free(rc.roads); 
-        if(full(tri, (t.n*t.n-t.n)/2, edges))
-            break;
-        next(tri, (t.n*t.n-t.n)/2);
+
+        free(rc.roads);  
+        if (full(tri, tri_length, edges))
+          break;
+        next(tri, tri_length);
     }
     opt[1] = sum/num;
     free(tri);
-    free(all);
+    free(all); 
     return opt;
 }
-
+ 
 void test_bruteforce(town t)
 {
-    //town t;
-    //t.n = 3;
-    //float dist[9] = {0,1,1,1,0,1,1,1,0};
-    //t.distances = dist;
-    //int importances[3] = {1,1,1};
-    //t.importances = importances;
-    printf("MIN: %f\nAVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
+    /* printf("Brute force \n");
+    town t;
+    t.n = 3;
+    int dist[9] = {0,3,5,3,0,4,5,4,0};
+    t.distances = dist;
+    int importances[3] = {1,2,3};
+    t.importances = importances; */
+    //printf("MIN: %f \t AVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
+    int max_edges = min((t.n * t.n - t.n)/2, t.n * MAX_K/2);
+    for (int i = t.n - 1; i <= max_edges; i++)
+    {
+      float *bf = bruteforce(t,i);
+      printf("%d \t MIN: %f \t AVERAGE: %f\n", i, bf[0], bf[1]);
+      free(bf);
+    }
 }
 
 int main()  
 { 
-  town test_town;
+  /*town test_town;
   test_town.n = 6;
   test_town.importances = malloc(test_town.n * sizeof(int));
   for (int i = 0; i < 6; i++)
     test_town.importances[i] = 1; 
   test_town.distances = malloc(test_town.n * test_town.n * sizeof(int));
-  test_town.distances[0] = 0;
-  test_town.distances[1] = 1;
-  test_town.distances[2] = 3;
-  test_town.distances[3] = 2;
-  test_town.distances[4] = 1;
-  test_town.distances[5] = 1;
-  test_town.distances[6] = 1;
-  test_town.distances[7] = 0;
-  test_town.distances[8] = 9;
-  test_town.distances[9] = 4;
-  test_town.distances[10] = 3;
-  test_town.distances[11] = 1; 
-  test_town.distances[12] = 3;
-  test_town.distances[13] = 9;
-  test_town.distances[14] = 0;
-  test_town.distances[15] = 2;
-  test_town.distances[16] = 3;
-  test_town.distances[17] = 2;
-  test_town.distances[18] = 2;
-  test_town.distances[19] = 4;
-  test_town.distances[20] = 2;
-  test_town.distances[21] = 0;
-  test_town.distances[22] = 6;
-  test_town.distances[23] = 1;
-  test_town.distances[24] = 1; 
-  test_town.distances[25] = 3;
-  test_town.distances[26] = 3;
-  test_town.distances[27] = 6;
-  test_town.distances[28] = 0;
-  test_town.distances[29] = 3;
-  test_town.distances[30] = 1;
-  test_town.distances[31] = 1;
-  test_town.distances[32] = 2;
-  test_town.distances[33] = 1;
-  test_town.distances[34] = 3;
-  test_town.distances[35] = 0;
+  int dist[36] = 
+    {0,1,3,2,1,1,
+     1,0,9,4,3,1,
+     3,9,0,2,3,2,
+     2,4,2,0,6,1,
+     1,3,3,6,0,3,
+     1,1,2,1,3,0};
+  test_town.distances = dist;
   
   road_construction r;
-  r.n = 6; r.m = 8; r.degree = malloc(6 * sizeof(int));
-  r.degree[0] = 3;
-  r.degree[1] = 3;
-  r.degree[2] = 3;
-  r.degree[3] = 2;
-  r.degree[4] = 3;
-  r.degree[5] = 2;
-  r.roads = malloc(36 * sizeof(bool));
-  r.roads[0] = 0;
-  r.roads[1] = 1;
-  r.roads[2] = 1;
-  r.roads[3] = 0;
-  r.roads[4] = 1;
-  r.roads[5] = 0;
-  r.roads[6] = 1;
-  r.roads[7] = 0;
-  r.roads[8] = 1;
-  r.roads[9] = 1;
-  r.roads[10] = 0;
-  r.roads[11] = 0;
-  r.roads[12] = 1;
-  r.roads[13] = 1;
-  r.roads[14] = 0;
-  r.roads[15] = 0;
-  r.roads[16] = 1;
-  r.roads[17] = 0;
-  r.roads[18] = 0;
-  r.roads[19] = 1;
-  r.roads[20] = 0;
-  r.roads[21] = 0;
-  r.roads[22] = 0;
-  r.roads[23] = 1;
-  r.roads[24] = 1;
-  r.roads[25] = 0;
-  r.roads[26] = 1;
-  r.roads[27] = 0;
-  r.roads[28] = 0;
-  r.roads[29] = 1;
-  r.roads[30] = 0;
-  r.roads[31] = 0;
-  r.roads[32] = 0;
-  r.roads[33] = 1;
-  r.roads[34] = 1;
-  r.roads[35] = 0;
-  
-  for (int i = 0; i < 6; i++)
-        { 
-          printf("\n"); 
-          for (int j = 0; j < 6; j++)
-            printf("%d ", r.roads[6 * i + j]);
-        }
-  
-  printf("\n Degrees: ");
-        for (int i = 0; i < 6; i++)
-          printf("%d ", r.degree[i]);
-  
-  float *td = traffic_dist(test_town, r, 6);
-        float *times_matrix = times(td, 6);
-        printf("Ans: %f\n", times_to_optimality(test_town, times_matrix));
-        
-        /* printf("\n TD Matrix: ");
-        for (int i = 0; i < 6; i++)
-        { 
-          printf("\n"); 
-          for (int j = 0; j < 6; j++)
-            printf("%f ", td[6 * i + j]);
-        }
-        printf("\n"); */
-        
-  
-  
-  
-  //platform *test = new_platform(5);
-  //printf("%d, %d", test->min_m, test->max_m);
-  
+  r.n = 6; r.m = 8; 
+  int r_degree[6] = {3,3,3,2,3,2};
+  r.degree = r_degree;
+  bool r_roads[36] =
+    {0,1,1,0,1,0,
+     1,0,1,1,0,0,
+     1,1,0,0,1,0,
+     0,1,0,0,0,1,
+     1,0,1,0,0,1,
+     0,0,0,1,1,0};
+  r.roads = r_roads; */
   
   platform *cur_p = new_platform(2); 
   cur_p->optimal_constructions[0].degree[0] = 1; 
@@ -274,24 +125,33 @@ int main()
   cur_p->optimal_constructions[0].roads[1] = 1;
   cur_p->optimal_constructions[0].roads[2] = 1;
   cur_p->optimal_constructions[0].roads[3] = 0;
-  //printf("%d, %d", test.min_m, test.max_m);
-       
-    /*platform *new_p = new_platform(3);
-    town sub_town;
-    sub_town.n = 3;
-    sub_town.distances = malloc(3 * 3 * sizeof(float));
-    sub_town.importances = malloc(3 * sizeof(int));
-    for (int j = 0; j < 3; j++)
+  
+  int n;
+  printf("Number of buildings: ");
+  scanf("%d", &n);
+  town t;
+  t.n = n;
+  t.distances = calloc(n * n, sizeof(int));
+  t.importances = calloc(n, sizeof(int)); 
+  printf("\nImportance array, separated by spaces: \n");
+  for (int i = 0; i < n; i++)
+    scanf("%d", &t.importances[i]);
+  printf("\nDistance matrix, separated by spaces: \n");
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j <= i; j++)
     {
-      sub_town.importances[j] = test_town.importances[j];
-      for (int k = 0; k < 3; k++)
-        sub_town.distances[3 * j + k] = sub_town.distances[3 * k + j] = test_town.distances[4 * j + k];
+      printf("%d ", t.distances[n * i + j]);
     }
-    extend_platform(sub_town, cur_p, new_p);
     
-    */
+    for (int j = i + 1; j < n; j++)
+    {
+      scanf("%d", &t.distances[n * i + j]);
+      t.distances[n * j + i] = t.distances[n * i + j]; 
+    }
+  }
    
-  for (int i = 3; i <= 6; i++) 
+  for (int i = 3; i <= n; i++) 
   {
     platform *new_p = new_platform(i);
     town sub_town; 
@@ -300,100 +160,51 @@ int main()
     sub_town.importances = calloc(i, sizeof(int));
     for (int j = 0; j < i; j++)
     {
-      sub_town.importances[j] = test_town.importances[j];
+      sub_town.importances[j] = t.importances[j];
       for (int k = j + 1; k < i; k++)
-        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = test_town.distances[6 * j + k];
+        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = t.distances[n * j + k];
     } 
     extend_platform(sub_town, cur_p, new_p);
+    free(sub_town.distances);
+    free(sub_town.importances);
+    int num_constructions = cur_p->max_m - cur_p->min_m + 1;
+    for (int j = 0; j < num_constructions; j++)
+    {
+      free(cur_p->optimal_constructions[j].degree);
+      free(cur_p->optimal_constructions[j].roads);
+    }
     free(cur_p->optimal_constructions);
     free(cur_p);
     cur_p = new_p;    
   }  
-      
+  
+  printf("\n");
+  int num_rc = cur_p->max_m - cur_p->min_m + 1;
+  for (int i = 0; i < num_rc; i++)
+  {
+    printf("%d edges: %f\n", i + cur_p->min_m, 
+      cur_p->optimal_constructions[i].optimality);
+  }
+
+  
+  //free(cur_p->optimal_constructions->degree);
+  //free(cur_p->optimal_constructions->roads);
+  int num_constructions = cur_p->max_m - cur_p->min_m + 1;
+    for (int j = 0; j < num_constructions; j++)
+    {
+      free(cur_p->optimal_constructions[j].degree);
+      free(cur_p->optimal_constructions[j].roads);
+    }
+  free(cur_p->optimal_constructions);
+  free(cur_p);
  
-  printf("\n5 edges: %f\n", cur_p->optimal_constructions[0].optimality);
-  printf("6 edges: %f\n", cur_p->optimal_constructions[1].optimality);
-  printf("7 edges: %f\n", cur_p->optimal_constructions[2].optimality);
-  printf("8 edges: %f\n", cur_p->optimal_constructions[3].optimality);
-  printf("9 edges: %f\n", cur_p->optimal_constructions[4].optimality);
-  printf("10 edges: %f\n", cur_p->optimal_constructions[5].optimality);
-  printf("12 edges: %f\n", cur_p->optimal_constructions[6].optimality);  
-   
-  /* bool *arr = malloc(3 * sizeof(bool));
-  arr[0] = 0; arr[1] = 0; arr[2] = 1;
-  next(arr, 3);
-  for (int i = 0; i < 3; i++)
-    printf("%d ", arr[i]); */
-  /*
-  hi *x = malloc(sizeof(hi)); 
-  x->importances = malloc(12 * sizeof(int));
-  x->importances[3] = 5;
- // *x = y(3);
-  printf("HERE: %d", x->importances[3]); */
+  int bf = 0;
+  printf("Should bruteforce? 1 = Yes, 0 = No: ");
+    scanf("%d", &bf);
+  if (bf)
+    test_bruteforce(t);
   
-  /* int *test = malloc(12 * sizeof(road_construction)); */
-  
-  /* if (test[0] == NULL)
-    printf("hi"); */ 
-  /* test[5] = 10;
-  test[3] = 8;
-  for (int i = 0; i < 12; i++)
-  { 
-    printf("%d\n", test[i]);
-  }
-  printf("%d\n", sizeof(int)); */
-  ///test_bruteforce();
-  int nodes=  0.0f;
-  printf("Number of Nodes: ");
-  scanf("%d", &nodes);
-  printf("Number of Nodes is :%d ", nodes);
-  
-  float *dist = malloc(nodes*nodes*sizeof(float));
-  float *temp = malloc((nodes*nodes-nodes)/2*sizeof(float));
-  printf("\nPlease input your distance matrix and press enter after each\n");
-  for(int i=0; i<(nodes*nodes-nodes)/2; i++)
-  {
-    printf("This is the %dth index: ",i);
-    scanf("%f", &temp[i]);
-  }
-  int counter= 0;
-  for(int i=0; i<nodes; i++)
-  {
-    for(int j =0; j<i; j++)
-    {
-        dist[nodes*i+j]=dist[nodes*j+i] = temp[counter];
-        counter++;
-    }
-  }
-  
-  int *importance = malloc(nodes*sizeof(int));
-  printf("\n Thank you! Now we need you to input importance matrix\n");
-  for(int i=0; i<nodes; i++)
-  {
-    printf("Importance of %dth node: ", i+1);
-    scanf("%d", &importance[i]);
-  }
-  
-  for(int i=0; i<nodes; i++)
-  {
-    for(int j=0; j<nodes; j++)
-    {
-        printf("%f ", dist[nodes*i+j]);
-    }
-    printf("\n");
-  }
-  town t; 
-  t.importances = importance;
-  t.distances = dist;
-  t.n = nodes;
-  test_bruteforce(t);
-  /* 
-  float arr[36] = 
-  {0,1,1,0,1,0,
-   1,0,1,0,1,0,
-   1,1,0,0,0,0,
-   0,0,0,0,1,1,
-   1,1,0,1,0,0,
-   0,0,0,1,0,0};
-   */
+  free(t.distances);
+  free(t.importances);
+
 }
