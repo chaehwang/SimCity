@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "test.c"
 #include "platform.c"
 
 float *bruteforce (town t, int edges)
@@ -11,7 +12,7 @@ float *bruteforce (town t, int edges)
     float sum = 0;
     int num = 0;
     float *opt = calloc(2, sizeof(float));  
-    opt[0] = INFTY;
+    opt[0] = INFTY; 
     for (int i = tri_length - edges; i < tri_length; i++)
     {
         tri[i] = 1;
@@ -41,7 +42,7 @@ float *bruteforce (town t, int edges)
           next(tri, tri_length);
           continue;
         }
-          
+         
         rc.degree = degree(all,t.n);
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
@@ -83,7 +84,7 @@ void test_bruteforce(town t)
     for (int i = t.n - 1; i <= max_edges; i++)
     {
       float *bf = bruteforce(t,i);
-      printf("%d \t MIN: %f \t AVERAGE: %f\n", i, bf[0], bf[1]);
+      printf("%d edges: MIN: %f AVERAGE: %f\n", i, bf[0], bf[1]);
       free(bf);
     }
 }
@@ -118,8 +119,8 @@ int main()
      0,0,0,1,1,0};
   r.roads = r_roads; */
   
-  platform *cur_p = new_platform(2); 
-  cur_p->optimal_constructions[0].degree[0] = 1; 
+  platform *cur_p = new_platform(2);
+  cur_p->optimal_constructions[0].degree[0] = 1;
   cur_p->optimal_constructions[0].degree[1] = 1;
   cur_p->optimal_constructions[0].roads[0] = 0;
   cur_p->optimal_constructions[0].roads[1] = 1;
@@ -151,8 +152,18 @@ int main()
     }
   }
   
+  // Heuristic start
   time_t start_t, end_t;
   time(&start_t);
+  
+  // free
+  int *ranks = make_rank(t.importances, t.n);
+  int *sorted_importances = importance_sort(ranks, t.importances, t.n);
+  int *sorted_distances = distance_sort(ranks, t.distances, t.n);
+  free(t.importances);
+  free(t.distances);
+  t.importances = sorted_importances;
+  t.distances = sorted_distances;
     
   for (int i = 3; i <= n; i++) 
   {
@@ -183,15 +194,17 @@ int main()
   
   printf("\n\nHeuristic Results: \n");
   int num_rc = cur_p->max_m - cur_p->min_m + 1;
+  // Print out adjacency matrix for each m
   for (int i = 0; i < num_rc; i++)
   {
     printf("%d edges: %f\n", i + cur_p->min_m, 
       cur_p->optimal_constructions[i].optimality);
   }
   
+  // Heuristic end
   time(&end_t);
   double diff_t = difftime(end_t, start_t);
-  printf("\nHeuristic Time: %f seconds\n", diff_t);
+  printf("Heuristic Time: %f seconds\n\n", diff_t);
   
   //free(cur_p->optimal_constructions->degree);
   //free(cur_p->optimal_constructions->roads);
@@ -209,7 +222,7 @@ int main()
     scanf("%d", &bf);
   if (bf)
   {
-    printf("\nBrute Force Results: \n");
+    printf("Brute Force Results: \n\n");
     time_t start_t, end_t;
     time(&start_t);
     test_bruteforce(t);
@@ -219,7 +232,7 @@ int main()
   }
   
   
-  
+  free(ranks);
   free(t.distances);
   free(t.importances);
 }

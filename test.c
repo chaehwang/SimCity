@@ -41,7 +41,7 @@
 
 int n = 4;
 
-int *make_rank(int *importances)
+int *make_rank(int *importances, int n)
 {
   int  *rank = malloc(n * sizeof(int));
   bool *done = malloc(n * sizeof(bool));
@@ -69,6 +69,15 @@ int *make_rank(int *importances)
   return rank;
 }
 
+int *importance_sort(int *rank, int *importances, int n)
+{
+  int *sorted = malloc(n * sizeof(int));
+  for (int i = 0; i < n; i++)
+    sorted[rank[i]] = importances[i];
+    
+  return sorted;
+}
+
 int *distance_sort(int *rank, int *distances, int n)
 {
   int *sorted = malloc(n * n * sizeof(int));
@@ -90,7 +99,7 @@ bool *reverse_matrix_sort(int *rank, bool *bools, int n)
   return ret;
 }
 
-int main()
+void test()
 {
   // testing for make_rank
   int *importances = malloc(n * sizeof(int));
@@ -98,31 +107,21 @@ int main()
   importances[1] = 7;
   importances[2] = 6;
   importances[3] = 8;
-  int *ranks = make_rank(importances);
+  int *ranks = make_rank(importances, n);
   for (int i = 0; i < n; i++) 
     printf("%d ", ranks[i]);
   printf("\n");
   free(ranks);
   
+  
+  
   // testing for distance_sort
-  int *distances = malloc(n * n * sizeof(int));
-  distances[0] = 0;
-  distances[1] = 6;
-  distances[2] = 6;
-  distances[3] = 7;
-  distances[4] = 6;
-  distances[5] = 0;
-  distances[6] = 8;
-  distances[7] = 5;
-  distances[8] = 6;
-  distances[9] = 8;
-  distances[10] = 0;
-  distances[11] = 2;
-  distances[12] = 7;
-  distances[13] = 5;
-  distances[14] = 2;
-  distances[15] = 0;
-  int *ranks0 = make_rank(importances);
+  int distances[16] =
+  {0,6,6,7,
+   6,0,8,5,
+   6,8,0,2,
+   7,5,2,0};
+  int *ranks0 = make_rank(importances, n);
   int *sorted_distances = distance_sort(ranks0, distances, n);
   for (int i = 0; i < 4; i++) 
   {  
@@ -131,7 +130,6 @@ int main()
       printf("%d ", sorted_distances[n * i + j]);
   }
   printf("\n");
-  free(distances);
   free(ranks0);
   free(sorted_distances);
   free(importances);
@@ -144,7 +142,7 @@ int main()
    1, 1, 0, 1,
    0, 0, 1, 0};
   
-  int *ranks1 = make_rank(test_importances);
+  int *ranks1 = make_rank(test_importances, n);
   bool *reversed = reverse_matrix_sort(ranks1, bools, n);
   for (int i = 0; i < 4; i++) 
   {  
