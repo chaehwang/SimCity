@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include "test.c"
 #include "platform.c"
 
 float *bruteforce (town t, int edges)
@@ -10,7 +12,7 @@ float *bruteforce (town t, int edges)
     float sum = 0;
     int num = 0;
     float *opt = calloc(2, sizeof(float));  
-    opt[0] = INFTY;
+    opt[0] = INFTY; 
     for (int i = tri_length - edges; i < tri_length; i++)
     {
         tri[i] = 1;
@@ -40,7 +42,7 @@ float *bruteforce (town t, int edges)
           next(tri, tri_length);
           continue;
         }
-          
+         
         rc.degree = degree(all,t.n);
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
@@ -83,7 +85,7 @@ void test_bruteforce(town t)
     for (int i = t.n - 1; i <= max_edges; i++)
     {
       float *bf = bruteforce(t,i);
-      printf("%d \t MIN: %f \t AVERAGE: %f\n", i, bf[0], bf[1]);
+      printf("%d edges: MIN: %f AVERAGE: %f\n", i, bf[0], bf[1]);
       free(bf);
     }
 }
@@ -118,8 +120,8 @@ int main()
      0,0,0,1,1,0};
   r.roads = r_roads; */
   
-  platform *cur_p = new_platform(2); 
-  cur_p->optimal_constructions[0].degree[0] = 1; 
+  platform *cur_p = new_platform(2);
+  cur_p->optimal_constructions[0].degree[0] = 1;
   cur_p->optimal_constructions[0].degree[1] = 1;
   cur_p->optimal_constructions[0].roads[0] = 0;
   cur_p->optimal_constructions[0].roads[1] = 1;
@@ -150,7 +152,21 @@ int main()
       t.distances[n * j + i] = t.distances[n * i + j]; 
     }
   }
-   
+  
+  // Heuristic start
+  time_t start_t, end_t;
+  time(&start_t);
+  
+  // free
+  int *ranks = make_rank(t.importances, t.n);
+  int *sorted_importances = importance_sort(ranks, t.importances, t.n);
+  int *sorted_distances = distance_sort(ranks, t.distances, t.n);
+  free(t.importances);
+  free(t.distances);
+  t.importances = sorted_importances;
+  t.distances = sorted_distances;
+  
+  
   for (int i = 3; i <= n; i++) 
   {
     platform *new_p = new_platform(i);
@@ -178,14 +194,46 @@ int main()
     cur_p = new_p;    
   }  
   
-  printf("\n");
+  printf("\n\nHeuristic Results: \n");
   int num_rc = cur_p->max_m - cur_p->min_m + 1;
+  // Print out adjacency matrix for each m
+  
+  FILE *f = fopen("file.txt", "w");
+  
   for (int i = 0; i < num_rc; i++)
   {
-    printf("%d edges: %f\n", i + cur_p->min_m, 
-      cur_p->optimal_constructions[i].optimality);
-  }
+      printf("%d edges: %f\n", i + cur_p->min_m, 
+        cur_p->optimal_constructions[i].optimality);
 
+  
+  //prints out to a text file
+      if(f==NULL)
+      {
+        printf("Error in opening file!\n");
+        exit(1);
+      }
+      
+      fprintf(f, "%d edges: %f\n", i + cur_p->min_m, 
+        cur_p->optimal_constructions[i].optimality);
+      fprintf(f, "\n");
+      for(int k=0; k<n; k++)
+      {
+        for(int j=0; j<n; j++)
+        {
+            fprintf(f, "%d ", (cur_p->optimal_constructions[i].roads[n*k+j]));
+        }
+        fprintf(f, "\n");
+      }
+      fprintf(f, "\n");
+  //fprintf(f, "Some text: %s\n", text);
+  //fprintf(f, "Some text: %s\n", text);
+  
+  }
+  fclose(f);
+  // Heuristic end 
+  time(&end_t);
+  double diff_t = difftime(end_t, start_t);
+  printf("Heuristic Time: %f seconds\n\n", diff_t);
   
   //free(cur_p->optimal_constructions->degree);
   //free(cur_p->optimal_constructions->roads);
@@ -199,11 +247,21 @@ int main()
   free(cur_p);
  
   int bf = 0;
-  printf("Should bruteforce? 1 = Yes, 0 = No: ");
+  printf("Bruteforce Search? 1 = Yes, 0 = No: ");
     scanf("%d", &bf);
   if (bf)
+  {
+    printf("Brute Force Results: \n\n");
+    time_t start_t, end_t;
+    time(&start_t);
     test_bruteforce(t);
+    time(&end_t);
+    double diff_t = difftime(end_t, start_t);
+    printf("\nBrute Force Time: %f seconds\n", diff_t);
+  }
   
+  
+  free(ranks);
   free(t.distances);
   free(t.importances);
 
