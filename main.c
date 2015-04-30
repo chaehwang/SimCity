@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "platform.c"
 
 float *bruteforce (town t, int edges)
@@ -149,7 +150,10 @@ int main()
       t.distances[n * j + i] = t.distances[n * i + j]; 
     }
   }
-   
+  
+  time_t start_t, end_t;
+  time(&start_t);
+    
   for (int i = 3; i <= n; i++) 
   {
     platform *new_p = new_platform(i);
@@ -177,13 +181,17 @@ int main()
     cur_p = new_p;    
   }  
   
-  printf("\n");
+  printf("\n\nHeuristic Results: \n");
   int num_rc = cur_p->max_m - cur_p->min_m + 1;
   for (int i = 0; i < num_rc; i++)
   {
     printf("%d edges: %f\n", i + cur_p->min_m, 
       cur_p->optimal_constructions[i].optimality);
   }
+  
+  time(&end_t);
+  double diff_t = difftime(end_t, start_t);
+  printf("\nHeuristic Time: %f seconds\n", diff_t);
   
   //free(cur_p->optimal_constructions->degree);
   //free(cur_p->optimal_constructions->roads);
@@ -197,10 +205,20 @@ int main()
   free(cur_p);
  
   int bf = 0;
-  printf("Should bruteforce? 1 = Yes, 0 = No: ");
+  printf("Bruteforce Search? 1 = Yes, 0 = No: ");
     scanf("%d", &bf);
   if (bf)
+  {
+    printf("\nBrute Force Results: \n");
+    time_t start_t, end_t;
+    time(&start_t);
     test_bruteforce(t);
+    time(&end_t);
+    double diff_t = difftime(end_t, start_t);
+    printf("\nBrute Force Time: %f seconds\n", diff_t);
+  }
+  
+  
   
   free(t.distances);
   free(t.importances);

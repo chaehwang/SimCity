@@ -49,82 +49,46 @@ int *make_rank(int *importances)
   for (int i = 0; i < n; i++)
   {
     int k = 0;
-    while (done[k] == true)
-    {
+    while (done[k])
       k++;
-    }
     int lowest = importances[k];
     int lowest_index = k;
 
     for (int j = 0; j < n; j++)
-    {
-      if (lowest > importances[j] && done[j] == false)
+      if (lowest > importances[j] && !done[j])
       {
         lowest_index = j;
         lowest = importances[j];
       }
-    }
   
     rank[lowest_index] = n - i - 1;
     done[lowest_index] = true;
-
-  }
+  }  
   
+  free(done);
   return rank;
 }
 
-
-
-float *distance_sort( int *rank, float *distances )
+int *distance_sort(int *rank, int *distances, int n)
 {
-  float *distances_row = malloc(n * n * sizeof(float));
-  float *distances_column = malloc(n * n * sizeof(float));
-  
+  int *sorted = malloc(n * n * sizeof(int));
+      
   for (int i = 0; i < n; i++)
-  {
     for (int j = 0; j < n; j++)
-    {
-      distances_row[n * rank[i] + j] = distances[n * i + j];
-    }
-  }
+      sorted[n * rank[j] + rank[i]] = distances[n * j + i];
   
-  for (int i = 0; i < n; i++)
-  {
-    for (int j = 0; j < n; j++)
-    {
-      distances_column[n * j + rank[i]] = distances_row[n * j + i];
-    }
-  }
-  
-  return distances_column;
+  return sorted;
 }
 
-
-bool *reverse_matrix_sort( int *rank, bool *bools )
+bool *reverse_matrix_sort(int *rank, bool *bools, int n)
 {
-  bool *bools_row = malloc(n * n * sizeof(bool));
-  bool *bools_column = malloc(n * n * sizeof(bool));
-  
+  bool *ret = malloc(n * n * sizeof(bool));
   for (int i = 0; i < n; i++)
-  {
     for (int j = 0; j < n; j++)
-    {
-      bools_row[n * i + j] = bools[n * rank[i] + j];
-    }
-  }
-  
-  for (int i = 0; i < n; i++)
-  {
-    for (int j = 0; j < n; j++)
-    {
-      bools_column[n * j + i] = bools_row[n * j + rank[i]];
-    }
-  }
-  
-  return bools_column;
+      ret[n * i + j] = bools[n * rank[i] + rank[j]];
+      
+  return ret;
 }
-
-
 
 int main()
 {
@@ -134,10 +98,14 @@ int main()
   importances[1] = 7;
   importances[2] = 6;
   importances[3] = 8;
-  for (int i = 0; i < n; i++) {printf("%d\n", (make_rank(importances))[i]);}
+  int *ranks = make_rank(importances);
+  for (int i = 0; i < n; i++) 
+    printf("%d ", ranks[i]);
+  printf("\n");
+  free(ranks);
   
   // testing for distance_sort
-  float *distances = malloc(n * n * sizeof(float));
+  int *distances = malloc(n * n * sizeof(int));
   distances[0] = 0;
   distances[1] = 6;
   distances[2] = 6;
@@ -145,43 +113,45 @@ int main()
   distances[4] = 6;
   distances[5] = 0;
   distances[6] = 8;
-  distances[7] = 10;
+  distances[7] = 5;
   distances[8] = 6;
   distances[9] = 8;
   distances[10] = 0;
   distances[11] = 2;
   distances[12] = 7;
-  distances[13] = 10;
+  distances[13] = 5;
   distances[14] = 2;
   distances[15] = 0;
-  for (int i = 0; i < 16; i++) {printf("%f\n", (distance_sort( (make_rank(importances)), distances ))[i]);}
+  int *ranks0 = make_rank(importances);
+  int *sorted_distances = distance_sort(ranks0, distances, n);
+  for (int i = 0; i < 4; i++) 
+  {  
+    printf("\n");
+    for (int j = 0; j < 4; j++)
+      printf("%d ", sorted_distances[n * i + j]);
+  }
+  printf("\n");
+  free(distances);
+  free(ranks0);
+  free(sorted_distances);
+  free(importances);
   
   // testing for reverse_matrix_sort (at the end with the matrix of bools)
-  bool *bools = malloc(n * n * sizeof(bool));
-  bools[0] = true;
-  bools[1] = true;
-  bools[2] = false;
-  bools[3] = false;
-  bools[4] = true;
-  bools[5] = false;
-  bools[6] = true;
-  bools[7] = false;
-  bools[8] = false;
-  bools[9] = true;
-  bools[10] = true;
-  bools[11] = true;
-  bools[12] = false;
-  bools[13] = false;
-  bools[14] = true;
-  bools[15] = true;
-  for (int i = 0; i < 16; i++) {printf("%d\n", (reverse_matrix_sort( make_rank(importances), bools ))[i]);}
+  int test_importances[4] = {3, 8, 2, 9};
+  bool bools[16] =
+  {0, 1, 1, 0,
+   1, 0, 1, 0,
+   1, 1, 0, 1,
+   0, 0, 1, 0};
+  
+  int *ranks1 = make_rank(test_importances);
+  bool *reversed = reverse_matrix_sort(ranks1, bools, n);
+  for (int i = 0; i < 4; i++) 
+  {  
+    printf("\n");
+    for (int j = 0; j < 4; j++)
+      printf("%d ", reversed[n * i + j]);
+  }
+  free(ranks1);
+  free(reversed);
 }
-
-
-
-
-
-
-
-
-
