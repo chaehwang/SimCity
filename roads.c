@@ -164,7 +164,6 @@ float *times(float *td, int n)
 
 void test_time()
 {
-
   float time[25] = {INFTY, 1, 1, INFTY, INFTY, 1, INFTY, 2.75, INFTY, 1, 1, 
     2.75, INFTY, 5.75, 4.25, INFTY, INFTY, 5.75, INFTY, INFTY, INFTY, 1, 4.25,
     INFTY, INFTY};
@@ -209,7 +208,6 @@ float times_to_optimality(town t, float *times)
   {
     for (int j = 0; j < i; j++)
     {
-      //if(times[n*i+j]!=INFTY)
       sum += times[n * i + j] * (log ((float)(t.importances[i] + t.importances[j])));
     } 
   }

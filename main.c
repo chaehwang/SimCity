@@ -198,27 +198,32 @@ int main()
   int num_rc = cur_p->max_m - cur_p->min_m + 1;
   // Print out adjacency matrix for each m
   
-  FILE *f = fopen("file.txt", "w");
+  FILE *f = fopen("Heuristic Optimal Road Constructions.txt", "w");
   
   for (int i = 0; i < num_rc; i++)
   {
       printf("%d edges: %f\n", i + cur_p->min_m, 
         cur_p->optimal_constructions[i].optimality);
 
-  
+   
   //prints out to a text file
-      if(f==NULL)
+      if(f == NULL)
       {
         printf("Error in opening file!\n");
         exit(1);
       }
       
+      /*bool *inverted = 
+        reverse_matrix_sort(ranks, cur_p->optimal_constructions[i].roads, t.n);
+      free(cur_p->optimal_constructions[i].roads);
+      cur_p->optimal_constructions[i].roads = inverted; */
+      
       fprintf(f, "%d edges: %f\n", i + cur_p->min_m, 
         cur_p->optimal_constructions[i].optimality);
       fprintf(f, "\n");
-      for(int k=0; k<n; k++)
+      for(int k = 0; k < n; k++)
       {
-        for(int j=0; j<n; j++)
+        for(int j = 0; j < n; j++)
         {
             fprintf(f, "%d ", (cur_p->optimal_constructions[i].roads[n*k+j]));
         }
