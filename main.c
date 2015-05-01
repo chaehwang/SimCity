@@ -143,6 +143,7 @@ int main()
   t.importances = calloc(n, sizeof(int)); 
   printf("Template Town or Manually Input? 1 = Template, 0 = Manual: ");
     scanf("%d", &template);
+  // template will put all importances and distances equal to 1
   if (template)
   {
     for (int i = 0; i < t.n; i++)
