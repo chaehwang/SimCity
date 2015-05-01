@@ -138,21 +138,13 @@ int main()
   scanf("%d", &n);
   town t;
   t.n = n;
-  int template = 0;
+  int manual = 0;
   t.distances = calloc(n * n, sizeof(int));
   t.importances = calloc(n, sizeof(int)); 
-  printf("Template Town or Manually Input? 1 = Template, 0 = Manual: ");
-    scanf("%d", &template);
+  printf("Manually Input or Template Town? 1 = Manual, 0 = Template: ");
+    scanf("%d", &manual);
   // template will put all importances and distances equal to 1
-  if (template)
-  {
-    for (int i = 0; i < t.n; i++)
-      t.importances[i] = 1;
-    for (int i = 0; i < t.n; i++)
-      for (int j = 0; j < i; j++)
-        t.distances[t.n * i + j] = t.distances[t.n * j + i] = 1;
-  } 
-  else
+  if (manual)
   {
     printf("\nImportance array of %d values, separated by spaces: \n", t.n);
     for (int i = 0; i < t.n; i++)
@@ -170,6 +162,14 @@ int main()
       }
     }
     printf("\n");
+  } 
+  else
+  {
+    for (int i = 0; i < t.n; i++)
+      t.importances[i] = 1;
+    for (int i = 0; i < t.n; i++)
+      for (int j = 0; j < i; j++)
+        t.distances[t.n * i + j] = t.distances[t.n * j + i] = 1;
   }
   
   // HEURISTIC START
@@ -261,8 +261,8 @@ int main()
   fclose(f);
   // Heuristic end 
   time(&end_t);
-  double diff_t = difftime(end_t, start_t);
-  printf("Heuristic Time: %f seconds\n\n", diff_t);
+  int diff_t = difftime(end_t, start_t);
+  printf("Heuristic Time: %d seconds\n\n", diff_t);
   
   int num_constructions = cur_p->max_m - cur_p->min_m + 1;
   for (int j = 0; j < num_constructions; j++)
