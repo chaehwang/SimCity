@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "platform.h"
 
+// check if this is the last permutation of edges "1"s in an array of n values
 bool full(bool *array, int n, int edges)
 {
   for (int i = 0; i < edges; i++)
@@ -9,6 +10,7 @@ bool full(bool *array, int n, int edges)
   return true;
 }
 
+// change the boolean array of length n to give the next permutation
 void next(bool *array, int n)
 {
   int last_true = n - 1;
@@ -33,6 +35,7 @@ int min(int n1, int n2)
     return n2;
 }
 
+// construct a new platform of n nodes with 0 values everywhere
 platform *new_platform(int n)
 {
   platform *new_p = malloc(sizeof(platform));
@@ -53,6 +56,7 @@ platform *new_platform(int n)
   return new_p;
 }
 
+// extend every road construction from an old platform to the new platform
 void extend_platform(town t, platform *old_p, platform *new_p)
 {
   int num_to_extend = old_p->max_m - old_p->min_m + 1;
@@ -60,6 +64,8 @@ void extend_platform(town t, platform *old_p, platform *new_p)
     extend_rc(t, old_p->optimal_constructions[i], new_p);
 }
 
+// take a road construction and add a node; add in edges to this node
+// in every way possible
 void extend_rc(town t, road_construction rc, platform *new_p)
 {
   for (int edges = 1; edges <= MAX_K; edges++)
@@ -71,14 +77,6 @@ void extend_rc(town t, road_construction rc, platform *new_p)
       roads[i] = 0;
     for (int i = rc.n - edges; i < rc.n; i++)
       roads[i] = 1;
-      
-    /* printf("Original: %d", edges);
-    for (int i = 0; i < rc.n; i++)
-    {
-      printf("\n");
-      for (int j = 0; j < rc.n; j++)
-        printf("%d ", rc.roads[rc.n * i + j]);
-    } */
    
     while(true)
     {
@@ -99,14 +97,6 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         for (int j = 0; j < i; j++)
           new_rc.roads[new_rc.n * i + j] = new_rc.roads[new_rc.n * j + i] 
             = rc.roads[rc.n * i + j];
-      
-      /*printf("After");
-      for (int i = 0; i < new_rc.n; i++)
-    {
-      printf("\n");
-      for (int j = 0; j < new_rc.n; j++)
-        printf("%d ", new_rc.roads[new_rc.n * i + j]);
-    } */
         
       for (int i = 0; i < rc.n; i++)
         if (roads[i])
@@ -116,8 +106,8 @@ void extend_rc(town t, road_construction rc, platform *new_p)
           new_rc.degree[i]++;
         }
           
-        // if maximum degree exceeded for some building, skip this combination 
-        // of road construction
+      // if maximum degree exceeded for some building, skip this combination 
+      // of road construction
       bool max_k_exceeded = false;
       for (int i = 0; i < rc.n; i++)
         if (new_rc.degree[i] > MAX_K)
@@ -131,7 +121,7 @@ void extend_rc(town t, road_construction rc, platform *new_p)
       {
         if(full(roads, rc.n, edges))
           break;
-        next(roads, rc.n); // printf("Continue\n");
+        next(roads, rc.n);
         continue;
       }
       else 
@@ -139,25 +129,6 @@ void extend_rc(town t, road_construction rc, platform *new_p)
         float *td = traffic_dist(t, new_rc, new_rc.n);
         float *times_matrix = times(td, new_rc.n);
         new_rc.optimality = times_to_optimality(t, times_matrix);
-        /*for (int i = 0; i < new_rc.n; i++)
-        { 
-          printf("\n"); 
-          for (int j = 0; j < new_rc.n; j++)
-            printf("%d ", new_rc.roads[new_rc.n * i + j]);
-        }
-        printf("\n Degrees: ");
-        for (int i = 0; i < new_rc.n; i++)
-          printf("%d ", new_rc.degree[i]);
-        printf("\n");
-        printf("\n TD Matrix: ");
-        for (int i = 0; i < new_rc.n; i++)
-        { 
-          printf("\n"); 
-          for (int j = 0; j < new_rc.n; j++)
-            printf("%f ", td[new_rc.n * i + j]);
-        }
-        printf("\n");
-        printf("(Graph above): Here: %d, %f\n", edges, new_rc.optimality); */
         free(td);
         free(times_matrix);
         add_rc(new_rc, new_p);        
@@ -169,18 +140,10 @@ void extend_rc(town t, road_construction rc, platform *new_p)
     }
     free(roads);
   }
-  
-  /* printf("Town information: distances: \n");
-  for (int i = 0; i < t.n; i++)
-  {
-    printf("\n");
-    for (int j = 0; j < t.n; j++)
-    {
-      printf("%f ", t.distances[t.n * i + j]);
-    }
-  } */
 }
 
+// put a road construction into the new platform by replacing the current
+// construction if the current construction has a better optimality
 void add_rc(road_construction rc, platform *new_p)
 {
   int index = rc.m - new_p->min_m;

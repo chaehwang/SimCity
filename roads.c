@@ -57,6 +57,7 @@ bool connected(road_construction rc)
   return true;
 }
 
+// return an array of the degree of each node
 int *degree(bool *roads, int n)
 {
   int *node_degree = calloc(n, sizeof(int));
@@ -71,6 +72,66 @@ int *degree(bool *roads, int n)
       }
   }
   return node_degree;
+}
+
+// calculate the distance between connected buildings weighted by
+// their traffic; this can be used as a measure of time to travel
+// between the two buildings
+float *traffic_dist(town t, road_construction c, int n)
+{
+  float *dist = calloc(n * n, sizeof(float));
+    
+  for(int i = 0; i<n; i++)
+  {
+    for(int j=0; j<n; j++)
+    {
+      if(c.roads[n*i+j])
+      {
+        float a1 = ((float)t.importances[j]/(float)c.degree[j]);
+        float a2 = ((float)t.importances[i]/(float)c.degree[i]);
+        dist[n * i + j]= t.distances[n * i + j] * (1.0 + a1 + a2);
+      }
+      else
+      dist[n * i + j] = INFTY;
+    }
+  }   
+  return dist;
+}
+
+float min_f(float n1, float n2)
+{
+  if (n1 < n2)
+    return n1;
+  else
+    return n2;
+}
+
+// apply the Floyd-Warshall algorithm to obtain the time to travel
+// between any two buildings
+float *times(float *td, int n)
+{
+  float *time_matrix = calloc(n * n, sizeof(float));
+  for (int r = 0; r < n*n; r++)
+    time_matrix[r] = td[r];
+  for (int k = 0; k < n; k++)
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < n; j++)
+        if (i != j)
+          time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
+            time_matrix[n*i+k]+time_matrix[n*k+j]);
+  return time_matrix;
+}
+
+// calculate the optimality of the road construction, based on the sum of
+// times to travel between any two buildings weighted by their importances
+float times_to_optimality(town t, float *times)
+{
+  float sum = 0;  
+  for (int i = 1, n = t.n; i < n; i++)
+    for (int j = 0; j < i; j++)
+      sum += times[n * i + j] * (log ((float)(t.importances[i] + t.importances[j])));
+
+  return sum;
 }
 
 // should return true
@@ -103,63 +164,7 @@ void test_degrees()
   int *degrees = degree(rc.roads, rc.n);
   for (int i = 0; i < 5; i++)
     printf("%d ", degrees[i]);
- // free(degrees);
-}
-
-float *traffic_dist(town t, road_construction c, int n)
-{
-  float *dist = calloc(n * n, sizeof(float));
-    
-  for(int i = 0; i<n; i++)
-  {
-    for(int j=0; j<n; j++)
-    {
-      if(c.roads[n*i+j])
-      {
-        float a1 = ((float)t.importances[j]/(float)c.degree[j]);
-        float a2 = ((float)t.importances[i]/(float)c.degree[i]);
-        //printf("%d and %d also %d plus %d", t.importances[i],degrees[i], t.importances[j], degrees[j]);
-        dist[n * i + j]= t.distances[n * i + j] * (1.0 + a1 + a2);
-        //printf("%f", dist[n*i+j]);
-      }
-      else
-      dist[n * i + j] = INFTY;
-    }
-  }
-   
-   return dist;
-}
-
-float min_f(float n1, float n2)
-{
-  if (n1 < n2)
-    return n1;
-  else
-    return n2;
-}
-
-float *times(float *td, int n)
-{
-  float *time_matrix = calloc(n * n, sizeof(float));
-  for (int r = 0; r < n*n; r++)
-  {
-    time_matrix[r] = td[r];
-  }
-  for (int k = 0; k < n; k++)
-  {
-    for (int i = 0; i < n; i++)
-    {
-      for (int j = 0; j < n; j++)
-      {
-        if (i != j)
-        {
-          time_matrix[n*i+j] = time_matrix[n*j+i] = min_f(time_matrix[n*i+j],
-            time_matrix[n*i+k]+time_matrix[n*k+j]);
-        }
-      }
-    }
-  }
-  return time_matrix;
+  free(degrees);
 }
 
 void test_time()
@@ -168,10 +173,9 @@ void test_time()
     2.75, INFTY, 5.75, 4.25, INFTY, INFTY, 5.75, INFTY, INFTY, INFTY, 1, 4.25,
     INFTY, INFTY};
   float *test = times(time,5);
-  for(int i=0;i<25;i++)
-  {
+  for(int i = 0; i < 25; i++)
     printf("%f ", test[i]);
-  }
+  free(test);
 }
 
 void test_distance()
@@ -189,30 +193,9 @@ void test_distance()
     t.importances = important;
     
     float *test = traffic_dist(t, rc, 5);
-    for(int i = 0; i<25; i++)
-    {
+    for(int i = 0; i < 25; i++)
         printf("%f ", test[i]);
-    }
-    for(int i=0; i<5; i++)
-    {
+    for(int i = 0; i < 5; i++)
         printf("%d ", t.importances[i]);
-    }
     free(test);
-}
-
-float times_to_optimality(town t, float *times)
-{
-  float sum = 0;
-  
-  for (int i = 1, n = t.n; i < n; i++)
-  {
-    for (int j = 0; j < i; j++)
-    {
-      sum += times[n * i + j] * (log ((float)(t.importances[i] + t.importances[j])));
-    } 
-  }
-
-  
-
-  return sum;
 }

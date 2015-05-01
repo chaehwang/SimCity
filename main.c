@@ -1,22 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "test.c"
+#include "sort.c"
 #include "platform.c"
 
+// given a town and the number of roads to construct, brute forces
+// the best optimality value that can be obtained, as well as the
+// average optimality for all road constructions that are connected
 float *bruteforce (town t, int edges)
 {
+    // tri is the upper triangle of the road constrction matrix,
+    // where edges are to be permuted through. all is the entire
+    // matrix, which can be calculated by symmetry after tri
     int tri_length = (t.n * t.n - t.n)/2;
     bool *tri = calloc(tri_length, sizeof(bool));
-    bool *all = calloc((t.n*t.n), sizeof(bool));
+    bool *all = calloc(t.n * t.n, sizeof(bool));
     float sum = 0;
     int num = 0;
+    // opt[0] is the best optimality, opt[1] is the average optimality
     float *opt = calloc(2, sizeof(float));  
     opt[0] = INFTY; 
+    // start with the first permutation, with all edges in the
+    // last entries of tri
     for (int i = tri_length - edges; i < tri_length; i++)
-    {
         tri[i] = 1;
-    }
+    
+    // go through every permutation
     while(true)
     {
         int counter = 0;
@@ -34,6 +43,7 @@ float *bruteforce (town t, int edges)
         rc.roads = calloc(t.n * t.n, sizeof(bool));
         for (int i = 0; i < t.n * t.n; i++)
           rc.roads[i] = all[i];
+        // if this permutation is not connected, move on to the next one
         if (!connected(rc))
         {
           free(rc.roads);
@@ -43,21 +53,21 @@ float *bruteforce (town t, int edges)
           continue;
         }
          
+        // otherwise, calculate optimality
         rc.degree = degree(all,t.n);
         float *td = traffic_dist(t, rc, rc.n);
         float *times_matrix = times(td, rc.n);
         rc.optimality = times_to_optimality(t, times_matrix);
-
         free(rc.degree);
         free(td);
         free(times_matrix);      
         
-            sum+= rc.optimality;
-            num++;
-            if (rc.optimality < opt[0])
-            {     
-              opt[0] = rc.optimality;
-            }
+        // update sum of total optimalities and number of constructions
+        sum+= rc.optimality;
+        num++;
+        // keep track of best optimality
+        if (rc.optimality < opt[0])
+          opt[0] = rc.optimality;
           
 
         free(rc.roads);  
@@ -65,22 +75,16 @@ float *bruteforce (town t, int edges)
           break;
         next(tri, tri_length);
     }
+    // calculate average optimality of connected road constructions
     opt[1] = sum/num;
     free(tri);
     free(all); 
     return opt;
 }
  
-void test_bruteforce(town t)
+// apply bruteforce for every possibility of number of edges
+void bruteforce_all(town t)
 {
-    /* printf("Brute force \n");
-    town t;
-    t.n = 3;
-    int dist[9] = {0,3,5,3,0,4,5,4,0};
-    t.distances = dist;
-    int importances[3] = {1,2,3};
-    t.importances = importances; */
-    //printf("MIN: %f \t AVERAGE: %f\n", bruteforce(t,2)[0], bruteforce(t,2)[1]);
     int max_edges = min((t.n * t.n - t.n)/2, t.n * MAX_K/2);
     for (int i = t.n - 1; i <= max_edges; i++)
     {
@@ -120,6 +124,7 @@ int main()
      0,0,0,1,1,0};
   r.roads = r_roads; */
   
+  // create base platform of two nodes connected to each other
   platform *cur_p = new_platform(2);
   cur_p->optimal_constructions[0].degree[0] = 1;
   cur_p->optimal_constructions[0].degree[1] = 1;
@@ -133,43 +138,62 @@ int main()
   scanf("%d", &n);
   town t;
   t.n = n;
+  int template = 0;
   t.distances = calloc(n * n, sizeof(int));
   t.importances = calloc(n, sizeof(int)); 
-  printf("\nImportance array, separated by spaces: \n");
-  for (int i = 0; i < n; i++)
-    scanf("%d", &t.importances[i]);
-  printf("\nDistance matrix, separated by spaces: \n");
-  for (int i = 0; i < n; i++)
+  printf("Template Town or Manually Input? 1 = Template, 0 = Manual: ");
+    scanf("%d", &template);
+  if (template)
   {
-    for (int j = 0; j <= i; j++)
+    for (int i = 0; i < t.n; i++)
+      t.importances[i] = 1;
+    for (int i = 0; i < t.n; i++)
+      for (int j = 0; j < i; j++)
+        t.distances[t.n * i + j] = t.distances[t.n * j + i] = 1;
+  } 
+  else
+  {
+    printf("\nImportance array of %d values, separated by spaces: \n", t.n);
+    for (int i = 0; i < t.n; i++)
+      scanf("%d", &t.importances[i]);
+    printf("\nDistance matrix, separated by spaces: \n");
+    for (int i = 0; i < t.n; i++)
     {
-      printf("%d ", t.distances[n * i + j]);
-    }
+      for (int j = 0; j <= i; j++)
+        printf("%d ", t.distances[t.n * i + j]); 
     
-    for (int j = i + 1; j < n; j++)
-    {
-      scanf("%d", &t.distances[n * i + j]);
-      t.distances[n * j + i] = t.distances[n * i + j]; 
+      for (int j = i + 1; j < t.n; j++)
+      {
+        scanf("%d", &t.distances[t.n * i + j]);
+        t.distances[t.n * j + i] = t.distances[t.n * i + j]; 
+      }
     }
+    printf("\n");
   }
   
-  // Heuristic start
+  // HEURISTIC START
   time_t start_t, end_t;
   time(&start_t);
   
-  // free
+  /* first sort buildings by importance and reindex the buildings so
+     our heuristic can build based on optimizing constructions for
+     most important buildings first (the buildings will be reindexed
+     back to their original indices after the heuristic is finished
+     before printing the road constructions to a separate file) */
   int *ranks = make_rank(t.importances, t.n);
   int *sorted_importances = importance_sort(ranks, t.importances, t.n);
   int *sorted_distances = distance_sort(ranks, t.distances, t.n);
   free(t.importances);
   free(t.distances);
   t.importances = sorted_importances;
-  t.distances = sorted_distances;
+  t.distances = sorted_distances; 
   
-  
+  // apply heuristic to repeatedly extend the platform from base case 2 nodes
+  // up to n nodes
   for (int i = 3; i <= n; i++) 
   {
     platform *new_p = new_platform(i);
+    // create subtown of the first i buildings
     town sub_town; 
     sub_town.n = i;
     sub_town.distances = calloc(i * i, sizeof(float));
@@ -178,7 +202,8 @@ int main()
     {
       sub_town.importances[j] = t.importances[j];
       for (int k = j + 1; k < i; k++)
-        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] = t.distances[n * j + k];
+        sub_town.distances[i * j + k] = sub_town.distances[i * k + j] 
+          = t.distances[n * j + k];
     } 
     extend_platform(sub_town, cur_p, new_p);
     free(sub_town.distances);
@@ -194,45 +219,43 @@ int main()
     cur_p = new_p;    
   }  
   
-  printf("\n\nHeuristic Results: \n");
+  // print out adjacency matrix for each m 
+  printf("\nHeuristic Results: \n");
   int num_rc = cur_p->max_m - cur_p->min_m + 1;
-  // Print out adjacency matrix for each m
   
   FILE *f = fopen("Heuristic Optimal Road Constructions.txt", "w");
   
   for (int i = 0; i < num_rc; i++)
   {
-      printf("%d edges: %f\n", i + cur_p->min_m, 
-        cur_p->optimal_constructions[i].optimality);
+    printf("%d edges: %f\n", i + cur_p->min_m, 
+      cur_p->optimal_constructions[i].optimality);
 
    
-  //prints out to a text file
-      if(f == NULL)
-      {
-        printf("Error in opening file!\n");
-        exit(1);
-      }
+    // prints out to a text file
+    if(f == NULL)
+    {
+      printf("Error in opening file!\n");
+      exit(1);
+    }
+    
+    /* reindex the buildings back to their original indices before the
+       heuristic was applied, and then print out the corresponding optimal
+       road construtions found */
+    bool *inverted = 
+      reverse_matrix_sort(ranks, cur_p->optimal_constructions[i].roads, t.n);
+    free(cur_p->optimal_constructions[i].roads);
+    cur_p->optimal_constructions[i].roads = inverted; 
       
-      /*bool *inverted = 
-        reverse_matrix_sort(ranks, cur_p->optimal_constructions[i].roads, t.n);
-      free(cur_p->optimal_constructions[i].roads);
-      cur_p->optimal_constructions[i].roads = inverted; */
-      
-      fprintf(f, "%d edges: %f\n", i + cur_p->min_m, 
-        cur_p->optimal_constructions[i].optimality);
+    fprintf(f, "%d edges: %f\n", i + cur_p->min_m, 
+      cur_p->optimal_constructions[i].optimality);
+    fprintf(f, "\n");
+    for(int k = 0; k < n; k++)
+    {
+      for(int j = 0; j < n; j++)
+        fprintf(f, "%d ", (cur_p->optimal_constructions[i].roads[n*k+j]));
       fprintf(f, "\n");
-      for(int k = 0; k < n; k++)
-      {
-        for(int j = 0; j < n; j++)
-        {
-            fprintf(f, "%d ", (cur_p->optimal_constructions[i].roads[n*k+j]));
-        }
-        fprintf(f, "\n");
-      }
-      fprintf(f, "\n");
-  //fprintf(f, "Some text: %s\n", text);
-  //fprintf(f, "Some text: %s\n", text);
-  
+    }
+    fprintf(f, "\n"); 
   }
   fclose(f);
   // Heuristic end 
@@ -240,14 +263,12 @@ int main()
   double diff_t = difftime(end_t, start_t);
   printf("Heuristic Time: %f seconds\n\n", diff_t);
   
-  //free(cur_p->optimal_constructions->degree);
-  //free(cur_p->optimal_constructions->roads);
   int num_constructions = cur_p->max_m - cur_p->min_m + 1;
-    for (int j = 0; j < num_constructions; j++)
-    {
-      free(cur_p->optimal_constructions[j].degree);
-      free(cur_p->optimal_constructions[j].roads);
-    }
+  for (int j = 0; j < num_constructions; j++)
+  {
+    free(cur_p->optimal_constructions[j].degree);
+    free(cur_p->optimal_constructions[j].roads);
+  }
   free(cur_p->optimal_constructions);
   free(cur_p);
  
@@ -259,15 +280,13 @@ int main()
     printf("Brute Force Results: \n\n");
     time_t start_t, end_t;
     time(&start_t);
-    test_bruteforce(t);
+    bruteforce_all(t);
     time(&end_t);
     double diff_t = difftime(end_t, start_t);
     printf("\nBrute Force Time: %f seconds\n", diff_t);
   }
   
-  
   free(ranks);
   free(t.distances);
   free(t.importances);
-
 }
